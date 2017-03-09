@@ -32,7 +32,7 @@ void a_main()
 {
 
     // Initialize tasks
-    Task_Create(Task_ReadJoystick, SYSTEM, 0);
+    Task_Create(Task_ReadJoystick, 4, 0);
     Task_Create(Task_WriteBluetooth, 4, 0);
 
     //Task_Create(Idle, 10, 0);

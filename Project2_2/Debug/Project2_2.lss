@@ -3,31 +3,31 @@ Project2_2.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800200  00800200  000008fc  2**0
+  0 .data         00000000  00800200  00800200  000008d8  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000888  00000000  00000000  00000074  2**1
+  1 .text         00000864  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00001254  00800200  00800200  000008fc  2**0
+  2 .bss          00001254  00800200  00800200  000008d8  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  000008fc  2**0
+  3 .comment      00000030  00000000  00000000  000008d8  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  0000092c  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000908  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000118  00000000  00000000  00000970  2**3
+  5 .debug_aranges 00000118  00000000  00000000  00000948  2**3
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00001a98  00000000  00000000  00000a88  2**0
+  6 .debug_info   00001a98  00000000  00000000  00000a60  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 0000107d  00000000  00000000  00002520  2**0
+  7 .debug_abbrev 0000107d  00000000  00000000  000024f8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   0000097d  00000000  00000000  0000359d  2**0
+  8 .debug_line   0000096b  00000000  00000000  00003575  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000254  00000000  00000000  00003f1c  2**2
+  9 .debug_frame  00000254  00000000  00000000  00003ee0  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000889  00000000  00000000  00004170  2**0
+ 10 .debug_str    00000889  00000000  00000000  00004134  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000007f0  00000000  00000000  000049f9  2**0
+ 11 .debug_loc    000007f0  00000000  00000000  000049bd  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 000000e0  00000000  00000000  000051e9  2**0
+ 12 .debug_ranges 000000e0  00000000  00000000  000051ad  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -97,7 +97,7 @@ Disassembly of section .text:
   7a:	00 00       	nop
   7c:	4c c0       	rjmp	.+152    	; 0x116 <__bad_interrupt>
   7e:	00 00       	nop
-  80:	89 c3       	rjmp	.+1810   	; 0x794 <__vector_32>
+  80:	77 c3       	rjmp	.+1774   	; 0x770 <__vector_32>
   82:	00 00       	nop
   84:	48 c0       	rjmp	.+144    	; 0x116 <__bad_interrupt>
   86:	00 00       	nop
@@ -178,8 +178,8 @@ Disassembly of section .text:
  10c:	a4 35       	cpi	r26, 0x54	; 84
  10e:	b2 07       	cpc	r27, r18
  110:	e1 f7       	brne	.-8      	; 0x10a <.do_clear_bss_loop>
- 112:	57 d3       	rcall	.+1710   	; 0x7c2 <main>
- 114:	b7 c3       	rjmp	.+1902   	; 0x884 <_exit>
+ 112:	45 d3       	rcall	.+1674   	; 0x79e <main>
+ 114:	a5 c3       	rjmp	.+1866   	; 0x860 <_exit>
 
 00000116 <__bad_interrupt>:
  116:	74 cf       	rjmp	.-280    	; 0x0 <__vectors>
@@ -432,10 +432,10 @@ void a_main()
 {
 
     // Initialize tasks
-    Task_Create(Task_ReadJoystick, SYSTEM, 0);
+    Task_Create(Task_ReadJoystick, 4, 0);
  278:	40 e0       	ldi	r20, 0x00	; 0
  27a:	50 e0       	ldi	r21, 0x00	; 0
- 27c:	63 e0       	ldi	r22, 0x03	; 3
+ 27c:	64 e0       	ldi	r22, 0x04	; 4
  27e:	70 e0       	ldi	r23, 0x00	; 0
  280:	89 e3       	ldi	r24, 0x39	; 57
  282:	91 e0       	ldi	r25, 0x01	; 1
@@ -568,7 +568,7 @@ int Task_GetArg(PID p) {
  37c:	73 e1       	ldi	r23, 0x13	; 19
  37e:	ce 01       	movw	r24, r28
  380:	01 96       	adiw	r24, 0x01	; 1
- 382:	2a d2       	rcall	.+1108   	; 0x7d8 <enqueue>
+ 382:	18 d2       	rcall	.+1072   	; 0x7b4 <enqueue>
  384:	15 c0       	rjmp	.+42     	; 0x3b0 <Kernel_Create_Task_At+0xf6>
  386:	42 30       	cpi	r20, 0x02	; 2
  388:	51 05       	cpc	r21, r1
@@ -582,7 +582,7 @@ int Task_GetArg(PID p) {
  398:	74 e1       	ldi	r23, 0x14	; 20
  39a:	ce 01       	movw	r24, r28
  39c:	01 96       	adiw	r24, 0x01	; 1
- 39e:	1c d2       	rcall	.+1080   	; 0x7d8 <enqueue>
+ 39e:	0a d2       	rcall	.+1044   	; 0x7b4 <enqueue>
  3a0:	07 c0       	rjmp	.+14     	; 0x3b0 <Kernel_Create_Task_At+0xf6>
  3a2:	44 e0       	ldi	r20, 0x04	; 4
  3a4:	52 e0       	ldi	r21, 0x02	; 2
@@ -590,7 +590,7 @@ int Task_GetArg(PID p) {
  3a8:	73 e1       	ldi	r23, 0x13	; 19
  3aa:	ce 01       	movw	r24, r28
  3ac:	01 96       	adiw	r24, 0x01	; 1
- 3ae:	14 d2       	rcall	.+1064   	; 0x7d8 <enqueue>
+ 3ae:	02 d2       	rcall	.+1028   	; 0x7b4 <enqueue>
  3b0:	e9 81       	ldd	r30, Y+1	; 0x01
  3b2:	fa 81       	ldd	r31, Y+2	; 0x02
  3b4:	80 81       	ld	r24, Z
@@ -687,14 +687,14 @@ int Task_GetArg(PID p) {
 00000472 <OS_Abort>:
  472:	81 e0       	ldi	r24, 0x01	; 1
  474:	90 e0       	ldi	r25, 0x00	; 0
- 476:	06 d2       	rcall	.+1036   	; 0x884 <_exit>
+ 476:	f4 d1       	rcall	.+1000   	; 0x860 <_exit>
 
 00000478 <Dispatch>:
  478:	62 e0       	ldi	r22, 0x02	; 2
  47a:	72 e0       	ldi	r23, 0x02	; 2
  47c:	80 eb       	ldi	r24, 0xB0	; 176
  47e:	93 e1       	ldi	r25, 0x13	; 19
- 480:	db d1       	rcall	.+950    	; 0x838 <dequeue>
+ 480:	c9 d1       	rcall	.+914    	; 0x814 <dequeue>
  482:	90 93 0f 02 	sts	0x020F, r25	; 0x80020f <Cp+0x1>
  486:	80 93 0e 02 	sts	0x020E, r24	; 0x80020e <Cp>
  48a:	89 2b       	or	r24, r25
@@ -702,7 +702,7 @@ int Task_GetArg(PID p) {
  48e:	64 e3       	ldi	r22, 0x34	; 52
  490:	74 e1       	ldi	r23, 0x14	; 20
  492:	cb 01       	movw	r24, r22
- 494:	d1 d1       	rcall	.+930    	; 0x838 <dequeue>
+ 494:	bf d1       	rcall	.+894    	; 0x814 <dequeue>
  496:	90 93 0f 02 	sts	0x020F, r25	; 0x80020f <Cp+0x1>
  49a:	80 93 0e 02 	sts	0x020E, r24	; 0x80020e <Cp>
  49e:	80 91 0e 02 	lds	r24, 0x020E	; 0x80020e <Cp>
@@ -713,7 +713,7 @@ int Task_GetArg(PID p) {
  4ac:	72 e0       	ldi	r23, 0x02	; 2
  4ae:	80 ed       	ldi	r24, 0xD0	; 208
  4b0:	93 e1       	ldi	r25, 0x13	; 19
- 4b2:	c2 d1       	rcall	.+900    	; 0x838 <dequeue>
+ 4b2:	b0 d1       	rcall	.+864    	; 0x814 <dequeue>
  4b4:	90 93 0f 02 	sts	0x020F, r25	; 0x80020f <Cp+0x1>
  4b8:	80 93 0e 02 	sts	0x020E, r24	; 0x80020e <Cp>
  4bc:	e0 91 0e 02 	lds	r30, 0x020E	; 0x80020e <Cp>
@@ -790,7 +790,7 @@ int Task_GetArg(PID p) {
  56a:	ee 58       	subi	r30, 0x8E	; 142
  56c:	ff 4f       	sbci	r31, 0xFF	; 255
  56e:	8f 4f       	sbci	r24, 0xFF	; 255
- 570:	81 c1       	rjmp	.+770    	; 0x874 <__tablejump2__>
+ 570:	6f c1       	rjmp	.+734    	; 0x850 <__tablejump2__>
  572:	fe 01       	movw	r30, r28
  574:	e9 5f       	subi	r30, 0xF9	; 249
  576:	fe 4f       	sbci	r31, 0xFE	; 254
@@ -865,7 +865,7 @@ int Task_GetArg(PID p) {
  600:	73 e1       	ldi	r23, 0x13	; 19
  602:	8e e0       	ldi	r24, 0x0E	; 14
  604:	92 e0       	ldi	r25, 0x02	; 2
- 606:	e8 d0       	rcall	.+464    	; 0x7d8 <enqueue>
+ 606:	d6 d0       	rcall	.+428    	; 0x7b4 <enqueue>
  608:	37 df       	rcall	.-402    	; 0x478 <Dispatch>
  60a:	8d cf       	rjmp	.-230    	; 0x526 <OS_Start+0x46>
  60c:	fe 01       	movw	r30, r28
@@ -1051,271 +1051,251 @@ ISR(TIMER1_COMPA_vect) {
  742:	bf 93       	push	r27
  744:	ef 93       	push	r30
  746:	ff 93       	push	r31
-	if (Cp->priority  == RR) Task_Next();
- 748:	80 91 0e 02 	lds	r24, 0x020E	; 0x80020e <Cp>
- 74c:	90 91 0f 02 	lds	r25, 0x020F	; 0x80020f <Cp+0x1>
- 750:	fc 01       	movw	r30, r24
- 752:	eb 5f       	subi	r30, 0xFB	; 251
- 754:	fe 4f       	sbci	r31, 0xFE	; 254
- 756:	20 81       	ld	r18, Z
- 758:	31 81       	ldd	r19, Z+1	; 0x01
- 75a:	21 30       	cpi	r18, 0x01	; 1
- 75c:	31 05       	cpc	r19, r1
- 75e:	11 f4       	brne	.+4      	; 0x764 <__vector_17+0x42>
- 760:	9a df       	rcall	.-204    	; 0x696 <Task_Next>
- 762:	05 c0       	rjmp	.+10     	; 0x76e <__vector_17+0x4c>
-	else if (Cp->priority == PERIODIC) {
- 764:	fc 01       	movw	r30, r24
- 766:	eb 5f       	subi	r30, 0xFB	; 251
- 768:	fe 4f       	sbci	r31, 0xFE	; 254
- 76a:	80 81       	ld	r24, Z
- 76c:	91 81       	ldd	r25, Z+1	; 0x01
-		//CALCULATE HOW MUCH TIME HAS PAST, AND HOW MUCH TIME IS LEFT. 
-		// PREMPT IF SysQueue.isEmpty == false
-	}
+	Task_Next();
+ 748:	a6 df       	rcall	.-180    	; 0x696 <Task_Next>
 }
- 76e:	ff 91       	pop	r31
- 770:	ef 91       	pop	r30
- 772:	bf 91       	pop	r27
- 774:	af 91       	pop	r26
- 776:	9f 91       	pop	r25
- 778:	8f 91       	pop	r24
- 77a:	7f 91       	pop	r23
- 77c:	6f 91       	pop	r22
- 77e:	5f 91       	pop	r21
- 780:	4f 91       	pop	r20
- 782:	3f 91       	pop	r19
- 784:	2f 91       	pop	r18
- 786:	0f 90       	pop	r0
- 788:	0b be       	out	0x3b, r0	; 59
- 78a:	0f 90       	pop	r0
- 78c:	0f be       	out	0x3f, r0	; 63
- 78e:	0f 90       	pop	r0
- 790:	1f 90       	pop	r1
- 792:	18 95       	reti
+ 74a:	ff 91       	pop	r31
+ 74c:	ef 91       	pop	r30
+ 74e:	bf 91       	pop	r27
+ 750:	af 91       	pop	r26
+ 752:	9f 91       	pop	r25
+ 754:	8f 91       	pop	r24
+ 756:	7f 91       	pop	r23
+ 758:	6f 91       	pop	r22
+ 75a:	5f 91       	pop	r21
+ 75c:	4f 91       	pop	r20
+ 75e:	3f 91       	pop	r19
+ 760:	2f 91       	pop	r18
+ 762:	0f 90       	pop	r0
+ 764:	0b be       	out	0x3b, r0	; 59
+ 766:	0f 90       	pop	r0
+ 768:	0f be       	out	0x3f, r0	; 63
+ 76a:	0f 90       	pop	r0
+ 76c:	1f 90       	pop	r1
+ 76e:	18 95       	reti
 
-00000794 <__vector_32>:
+00000770 <__vector_32>:
 
 /**
   * ISR for timer3
   */
 ISR(TIMER3_COMPA_vect) { // PERIOD: 1 s
- 794:	1f 92       	push	r1
- 796:	0f 92       	push	r0
- 798:	0f b6       	in	r0, 0x3f	; 63
- 79a:	0f 92       	push	r0
- 79c:	11 24       	eor	r1, r1
- 79e:	8f 93       	push	r24
- 7a0:	9f 93       	push	r25
+ 770:	1f 92       	push	r1
+ 772:	0f 92       	push	r0
+ 774:	0f b6       	in	r0, 0x3f	; 63
+ 776:	0f 92       	push	r0
+ 778:	11 24       	eor	r1, r1
+ 77a:	8f 93       	push	r24
+ 77c:	9f 93       	push	r25
 	tickOverflowCount += 1;
- 7a2:	80 91 06 02 	lds	r24, 0x0206	; 0x800206 <tickOverflowCount>
- 7a6:	90 91 07 02 	lds	r25, 0x0207	; 0x800207 <tickOverflowCount+0x1>
- 7aa:	01 96       	adiw	r24, 0x01	; 1
- 7ac:	90 93 07 02 	sts	0x0207, r25	; 0x800207 <tickOverflowCount+0x1>
- 7b0:	80 93 06 02 	sts	0x0206, r24	; 0x800206 <tickOverflowCount>
+ 77e:	80 91 06 02 	lds	r24, 0x0206	; 0x800206 <tickOverflowCount>
+ 782:	90 91 07 02 	lds	r25, 0x0207	; 0x800207 <tickOverflowCount+0x1>
+ 786:	01 96       	adiw	r24, 0x01	; 1
+ 788:	90 93 07 02 	sts	0x0207, r25	; 0x800207 <tickOverflowCount+0x1>
+ 78c:	80 93 06 02 	sts	0x0206, r24	; 0x800206 <tickOverflowCount>
 }
- 7b4:	9f 91       	pop	r25
- 7b6:	8f 91       	pop	r24
- 7b8:	0f 90       	pop	r0
- 7ba:	0f be       	out	0x3f, r0	; 63
- 7bc:	0f 90       	pop	r0
- 7be:	1f 90       	pop	r1
- 7c0:	18 95       	reti
+ 790:	9f 91       	pop	r25
+ 792:	8f 91       	pop	r24
+ 794:	0f 90       	pop	r0
+ 796:	0f be       	out	0x3f, r0	; 63
+ 798:	0f 90       	pop	r0
+ 79a:	1f 90       	pop	r1
+ 79c:	18 95       	reti
 
-000007c2 <main>:
+0000079e <main>:
 
 /**
   * This function boots the OS and creates the first task: a_main
   */
 void main() {
 	setup();
- 7c2:	7a df       	rcall	.-268    	; 0x6b8 <setup>
+ 79e:	8c df       	rcall	.-232    	; 0x6b8 <setup>
 
 	OS_Init();
- 7c4:	32 de       	rcall	.-924    	; 0x42a <OS_Init>
+ 7a0:	44 de       	rcall	.-888    	; 0x42a <OS_Init>
 	Task_Create(a_main, 0, 1);
- 7c6:	41 e0       	ldi	r20, 0x01	; 1
- 7c8:	50 e0       	ldi	r21, 0x00	; 0
- 7ca:	60 e0       	ldi	r22, 0x00	; 0
- 7cc:	70 e0       	ldi	r23, 0x00	; 0
- 7ce:	8c e3       	ldi	r24, 0x3C	; 60
- 7d0:	91 e0       	ldi	r25, 0x01	; 1
- 7d2:	3c df       	rcall	.-392    	; 0x64c <Task_Create>
+ 7a2:	41 e0       	ldi	r20, 0x01	; 1
+ 7a4:	50 e0       	ldi	r21, 0x00	; 0
+ 7a6:	60 e0       	ldi	r22, 0x00	; 0
+ 7a8:	70 e0       	ldi	r23, 0x00	; 0
+ 7aa:	8c e3       	ldi	r24, 0x3C	; 60
+ 7ac:	91 e0       	ldi	r25, 0x01	; 1
+ 7ae:	4e df       	rcall	.-356    	; 0x64c <Task_Create>
 	OS_Start();
- 7d4:	85 ce       	rjmp	.-758    	; 0x4e0 <OS_Start>
- 7d6:	08 95       	ret
+ 7b0:	97 ce       	rjmp	.-722    	; 0x4e0 <OS_Start>
+ 7b2:	08 95       	ret
 
-000007d8 <enqueue>:
+000007b4 <enqueue>:
 }
 
 /*
  *  Insert into the queue sorted by priority
  */
 void enqueue(volatile PD **p, volatile PD **Queue, volatile int *QCount) {
- 7d8:	cf 93       	push	r28
- 7da:	df 93       	push	r29
- 7dc:	ea 01       	movw	r28, r20
+ 7b4:	cf 93       	push	r28
+ 7b6:	df 93       	push	r29
+ 7b8:	ea 01       	movw	r28, r20
 
 /*
  *  Checks if queue is full
  */
 volatile int isFull(volatile int *QCount) {
     return *QCount == MAXTHREAD - 1;
- 7de:	28 81       	ld	r18, Y
- 7e0:	39 81       	ldd	r19, Y+1	; 0x01
+ 7ba:	28 81       	ld	r18, Y
+ 7bc:	39 81       	ldd	r19, Y+1	; 0x01
 
 /*
  *  Insert into the queue sorted by priority
  */
 void enqueue(volatile PD **p, volatile PD **Queue, volatile int *QCount) {
     if(isFull(QCount)) {
- 7e2:	2f 30       	cpi	r18, 0x0F	; 15
- 7e4:	31 05       	cpc	r19, r1
- 7e6:	29 f1       	breq	.+74     	; 0x832 <enqueue+0x5a>
+ 7be:	2f 30       	cpi	r18, 0x0F	; 15
+ 7c0:	31 05       	cpc	r19, r1
+ 7c2:	29 f1       	breq	.+74     	; 0x80e <enqueue+0x5a>
         return NULL;
     }
 
     int i = (*QCount) - 1;
- 7e8:	e8 81       	ld	r30, Y
- 7ea:	f9 81       	ldd	r31, Y+1	; 0x01
- 7ec:	9f 01       	movw	r18, r30
- 7ee:	21 50       	subi	r18, 0x01	; 1
- 7f0:	31 09       	sbc	r19, r1
+ 7c4:	e8 81       	ld	r30, Y
+ 7c6:	f9 81       	ldd	r31, Y+1	; 0x01
+ 7c8:	9f 01       	movw	r18, r30
+ 7ca:	21 50       	subi	r18, 0x01	; 1
+ 7cc:	31 09       	sbc	r19, r1
     volatile PD *new = *p;
     volatile PD *temp = Queue[i];
 
     while(i >= 0) {
- 7f2:	72 f0       	brmi	.+28     	; 0x810 <enqueue+0x38>
- 7f4:	ee 0f       	add	r30, r30
- 7f6:	ff 1f       	adc	r31, r31
- 7f8:	e6 0f       	add	r30, r22
- 7fa:	f7 1f       	adc	r31, r23
- 7fc:	db 01       	movw	r26, r22
+ 7ce:	72 f0       	brmi	.+28     	; 0x7ec <enqueue+0x38>
+ 7d0:	ee 0f       	add	r30, r30
+ 7d2:	ff 1f       	adc	r31, r31
+ 7d4:	e6 0f       	add	r30, r22
+ 7d6:	f7 1f       	adc	r31, r23
+ 7d8:	db 01       	movw	r26, r22
         Queue[i+1] = Queue[i];
- 7fe:	32 91       	ld	r19, -Z
- 800:	22 91       	ld	r18, -Z
- 802:	33 83       	std	Z+3, r19	; 0x03
- 804:	22 83       	std	Z+2, r18	; 0x02
+ 7da:	32 91       	ld	r19, -Z
+ 7dc:	22 91       	ld	r18, -Z
+ 7de:	33 83       	std	Z+3, r19	; 0x03
+ 7e0:	22 83       	std	Z+2, r18	; 0x02
 
     int i = (*QCount) - 1;
     volatile PD *new = *p;
     volatile PD *temp = Queue[i];
 
     while(i >= 0) {
- 806:	ea 17       	cp	r30, r26
- 808:	fb 07       	cpc	r31, r27
- 80a:	c9 f7       	brne	.-14     	; 0x7fe <enqueue+0x26>
+ 7e2:	ea 17       	cp	r30, r26
+ 7e4:	fb 07       	cpc	r31, r27
+ 7e6:	c9 f7       	brne	.-14     	; 0x7da <enqueue+0x26>
         Queue[i+1] = Queue[i];
         i--;
- 80c:	2f ef       	ldi	r18, 0xFF	; 255
- 80e:	3f ef       	ldi	r19, 0xFF	; 255
+ 7e8:	2f ef       	ldi	r18, 0xFF	; 255
+ 7ea:	3f ef       	ldi	r19, 0xFF	; 255
         temp = Queue[i];
     }
 
     Queue[i+1] = *p;
- 810:	fc 01       	movw	r30, r24
- 812:	80 81       	ld	r24, Z
- 814:	91 81       	ldd	r25, Z+1	; 0x01
- 816:	2f 5f       	subi	r18, 0xFF	; 255
- 818:	3f 4f       	sbci	r19, 0xFF	; 255
- 81a:	22 0f       	add	r18, r18
- 81c:	33 1f       	adc	r19, r19
- 81e:	fb 01       	movw	r30, r22
- 820:	e2 0f       	add	r30, r18
- 822:	f3 1f       	adc	r31, r19
- 824:	91 83       	std	Z+1, r25	; 0x01
- 826:	80 83       	st	Z, r24
+ 7ec:	fc 01       	movw	r30, r24
+ 7ee:	80 81       	ld	r24, Z
+ 7f0:	91 81       	ldd	r25, Z+1	; 0x01
+ 7f2:	2f 5f       	subi	r18, 0xFF	; 255
+ 7f4:	3f 4f       	sbci	r19, 0xFF	; 255
+ 7f6:	22 0f       	add	r18, r18
+ 7f8:	33 1f       	adc	r19, r19
+ 7fa:	fb 01       	movw	r30, r22
+ 7fc:	e2 0f       	add	r30, r18
+ 7fe:	f3 1f       	adc	r31, r19
+ 800:	91 83       	std	Z+1, r25	; 0x01
+ 802:	80 83       	st	Z, r24
     (*QCount)++;
- 828:	88 81       	ld	r24, Y
- 82a:	99 81       	ldd	r25, Y+1	; 0x01
- 82c:	01 96       	adiw	r24, 0x01	; 1
- 82e:	99 83       	std	Y+1, r25	; 0x01
- 830:	88 83       	st	Y, r24
+ 804:	88 81       	ld	r24, Y
+ 806:	99 81       	ldd	r25, Y+1	; 0x01
+ 808:	01 96       	adiw	r24, 0x01	; 1
+ 80a:	99 83       	std	Y+1, r25	; 0x01
+ 80c:	88 83       	st	Y, r24
 }
- 832:	df 91       	pop	r29
- 834:	cf 91       	pop	r28
- 836:	08 95       	ret
+ 80e:	df 91       	pop	r29
+ 810:	cf 91       	pop	r28
+ 812:	08 95       	ret
 
-00000838 <dequeue>:
+00000814 <dequeue>:
 
 /*
  *  Return the first element of the Ready Queue
  */
 volatile PD *dequeue(volatile PD **Queue, volatile int *QCount) {
- 838:	db 01       	movw	r26, r22
+ 814:	db 01       	movw	r26, r22
 
 /*
  *  Checks if queue is empty, READY QUEUE SHOULD NEVER BE EMPTY
  */
 volatile int isEmpty(volatile int *QCount) {
     return *QCount == 0;
- 83a:	2d 91       	ld	r18, X+
- 83c:	3c 91       	ld	r19, X
- 83e:	11 97       	sbiw	r26, 0x01	; 1
+ 816:	2d 91       	ld	r18, X+
+ 818:	3c 91       	ld	r19, X
+ 81a:	11 97       	sbiw	r26, 0x01	; 1
 /*
  *  Return the first element of the Ready Queue
  */
 volatile PD *dequeue(volatile PD **Queue, volatile int *QCount) {
 
    if(isEmpty(QCount)) {
- 840:	23 2b       	or	r18, r19
- 842:	a9 f0       	breq	.+42     	; 0x86e <dequeue+0x36>
+ 81c:	23 2b       	or	r18, r19
+ 81e:	a9 f0       	breq	.+42     	; 0x84a <dequeue+0x36>
 	   return NULL;
    }
 
    volatile PD *result = (Queue[(*QCount)-1]);
- 844:	2d 91       	ld	r18, X+
- 846:	3c 91       	ld	r19, X
- 848:	11 97       	sbiw	r26, 0x01	; 1
- 84a:	f9 01       	movw	r30, r18
- 84c:	e1 50       	subi	r30, 0x01	; 1
- 84e:	f0 48       	sbci	r31, 0x80	; 128
- 850:	ee 0f       	add	r30, r30
- 852:	ff 1f       	adc	r31, r31
- 854:	e8 0f       	add	r30, r24
- 856:	f9 1f       	adc	r31, r25
- 858:	80 81       	ld	r24, Z
- 85a:	91 81       	ldd	r25, Z+1	; 0x01
+ 820:	2d 91       	ld	r18, X+
+ 822:	3c 91       	ld	r19, X
+ 824:	11 97       	sbiw	r26, 0x01	; 1
+ 826:	f9 01       	movw	r30, r18
+ 828:	e1 50       	subi	r30, 0x01	; 1
+ 82a:	f0 48       	sbci	r31, 0x80	; 128
+ 82c:	ee 0f       	add	r30, r30
+ 82e:	ff 1f       	adc	r31, r31
+ 830:	e8 0f       	add	r30, r24
+ 832:	f9 1f       	adc	r31, r25
+ 834:	80 81       	ld	r24, Z
+ 836:	91 81       	ldd	r25, Z+1	; 0x01
    (*QCount)--;
- 85c:	2d 91       	ld	r18, X+
- 85e:	3c 91       	ld	r19, X
- 860:	11 97       	sbiw	r26, 0x01	; 1
- 862:	21 50       	subi	r18, 0x01	; 1
- 864:	31 09       	sbc	r19, r1
- 866:	11 96       	adiw	r26, 0x01	; 1
- 868:	3c 93       	st	X, r19
- 86a:	2e 93       	st	-X, r18
+ 838:	2d 91       	ld	r18, X+
+ 83a:	3c 91       	ld	r19, X
+ 83c:	11 97       	sbiw	r26, 0x01	; 1
+ 83e:	21 50       	subi	r18, 0x01	; 1
+ 840:	31 09       	sbc	r19, r1
+ 842:	11 96       	adiw	r26, 0x01	; 1
+ 844:	3c 93       	st	X, r19
+ 846:	2e 93       	st	-X, r18
 
    return result;
- 86c:	08 95       	ret
+ 848:	08 95       	ret
  *  Return the first element of the Ready Queue
  */
 volatile PD *dequeue(volatile PD **Queue, volatile int *QCount) {
 
    if(isEmpty(QCount)) {
 	   return NULL;
- 86e:	80 e0       	ldi	r24, 0x00	; 0
- 870:	90 e0       	ldi	r25, 0x00	; 0
+ 84a:	80 e0       	ldi	r24, 0x00	; 0
+ 84c:	90 e0       	ldi	r25, 0x00	; 0
 
    volatile PD *result = (Queue[(*QCount)-1]);
    (*QCount)--;
 
    return result;
 }
- 872:	08 95       	ret
+ 84e:	08 95       	ret
 
-00000874 <__tablejump2__>:
- 874:	ee 0f       	add	r30, r30
- 876:	ff 1f       	adc	r31, r31
- 878:	88 1f       	adc	r24, r24
- 87a:	8b bf       	out	0x3b, r24	; 59
- 87c:	07 90       	elpm	r0, Z+
- 87e:	f6 91       	elpm	r31, Z
- 880:	e0 2d       	mov	r30, r0
- 882:	19 94       	eijmp
+00000850 <__tablejump2__>:
+ 850:	ee 0f       	add	r30, r30
+ 852:	ff 1f       	adc	r31, r31
+ 854:	88 1f       	adc	r24, r24
+ 856:	8b bf       	out	0x3b, r24	; 59
+ 858:	07 90       	elpm	r0, Z+
+ 85a:	f6 91       	elpm	r31, Z
+ 85c:	e0 2d       	mov	r30, r0
+ 85e:	19 94       	eijmp
 
-00000884 <_exit>:
- 884:	f8 94       	cli
+00000860 <_exit>:
+ 860:	f8 94       	cli
 
-00000886 <__stop_program>:
- 886:	ff cf       	rjmp	.-2      	; 0x886 <__stop_program>
+00000862 <__stop_program>:
+ 862:	ff cf       	rjmp	.-2      	; 0x862 <__stop_program>

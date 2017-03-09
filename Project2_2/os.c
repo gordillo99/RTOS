@@ -400,12 +400,7 @@ void setup() {
   * ISR for timer1
   */
 ISR(TIMER1_COMPA_vect) { 
-	if (Cp->priority == RR) Task_Next();
-	else if (Cp->priority == PERIODIC) {
-		// CALCULATE HOW MUCH TIME HAS PAST, AND HOW MUCH TIME IS LEFT. 
-		// PREMPT IF SysQueue.isEmpty == false
-	}
-	// DO NOTHING IF IT IS SYSTEM TASK
+	Task_Next();
 }
 
 /**
