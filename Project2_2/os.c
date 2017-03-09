@@ -175,11 +175,7 @@ static PID Kernel_Create_Task(voidfuncptr f, PRIORITY priority, int arg ) {
   *  Terminate a task
   */
 static void Kernel_Terminate_Task() {
-	Cp->priority = 0;
-	Cp->state = TERMINATED;
-
 	Cp->state = DEAD;
-	Cp->priority = MINPRIORITY;
 	Cp->processID = 0;
 	Tasks--;
 }
@@ -192,7 +188,7 @@ static void Dispatch() {
 	Cp = dequeue(&SysQueue, &SysCount);
 
 	if(Cp == NULL) {
-		Cp = dequeue(&RRQueue, &RRQueue);
+		Cp = dequeue(&RRQueue, &RRCount);
 	}
 
 	if(Cp == NULL) {
@@ -247,7 +243,16 @@ static void Next_Kernel_Request() {
 		case NEXT:
 		case NONE:
 			Cp->state = READY;
-			enqueue(&Cp, &ReadyQueue, &RQCount);
+			if (Cp->priority == SYSTEM) {
+				enqueue(&Cp, &SysQueue, &SysCount);
+			} else if (Cp->priority == PERIODIC) {
+
+			} else if (Cp->priority == RR) {
+				enqueue(&Cp, &RRQueue, &RRCount);
+			} else {
+				enqueue(&Cp, &ReadyQueue, &RQCount); // original code (temporary)
+			}
+
 			Dispatch();
 			break;
 		case TERMINATE:
@@ -308,12 +313,22 @@ void OS_Abort() {
 /**
   * Application or kernel level task create to setup system call
   */
-PID Task_Create( voidfuncptr f, PRIORITY priority, int arg){
+PID Task_Create(voidfuncptr f, PRIORITY priority, int arg){
 	unsigned int p;
 
 	if (KernelActive) {
 		Disable_Interrupt();
-		Cp->request = CREATE;
+	
+		if (priority == SYSTEM) {
+			Cp->request = CREATE_SYS;
+		} else if (priority == PERIODIC) {
+
+		} else if (priority == RR) {
+			Cp->request = CREATE_RR;
+		} else {
+			Cp->request = CREATE; // original code (temporary)
+		}
+
 		Cp->code = f;
 		Cp->priority = priority;
 		Cp->arg = arg;
@@ -414,10 +429,18 @@ ISR(TIMER3_COMPA_vect) { // PERIOD: 1 s
   * This function boots the OS and creates the first task: a_main
   */
 void main() {
+DDRA |= (1<<PA4);
+PORTA &= ~(1<<PA4);
+
+DDRA |= (1<<PA5);
+PORTA &= ~(1<<PA5);
+
+DDRA |= (1<<PA3);
+PORTA &= ~(1<<PA3);
 	setup();
 
 	OS_Init();
-	Task_Create(a_main, 0, 1);
+	Task_Create(a_main, SYSTEM, 1);
 	OS_Start();
 }
 

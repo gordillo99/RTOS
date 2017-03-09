@@ -23,6 +23,29 @@ void Task_ReadJoystick()
     }
 }
 
+void ASDF()
+{
+/*
+	int x = 0;
+	for(; x < 100000; x++)
+	{
+		if (x < 10000000/2) {
+			
+			DDRA |= (1<<PA4);
+			PORTA ^= (1<<PA4);
+			//Task_Next();
+		} else {
+			Task_Terminate();
+		}
+
+	}
+	*/
+	PORTA ^= (1<<PA4);
+	_delay_ms(2000);
+	PORTA ^= (1<<PA4);
+	Task_Terminate();
+}
+
 
 void Idle() {
     for(;;) {}
@@ -30,10 +53,11 @@ void Idle() {
 
 void a_main()
 {
-
+	
     // Initialize tasks
-    Task_Create(Task_ReadJoystick, 4, 0);
-    Task_Create(Task_WriteBluetooth, 4, 0);
+	//Task_Create(ASDF, SYSTEM, 0);
+    Task_Create(Task_ReadJoystick, RR, 0);
+    Task_Create(Task_WriteBluetooth, RR, 0);
 
     //Task_Create(Idle, 10, 0);
 
