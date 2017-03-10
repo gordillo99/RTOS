@@ -8,10 +8,7 @@ void Task_WriteBluetooth()
 	DDRB |= (1<<PB7);
     for(;;){
 		PORTB |= (1<<PB7); //MAKE LED FLASH
-		//for(x = 0; x < 32; x++){}
-		//DDRA |= (1<<PA3);
-		//PORTA &= ~(1<<PA3);
-        //Task_Next();
+        Task_Next();
     }
 }
 
@@ -22,10 +19,7 @@ void Task_ReadJoystick()
     for(;;)
     {
 		PORTB = (0<<PB7); //TURN LED FLASH OFF
-		//for(x = 0; x < 32; x++){}
-        //DDRA |= (1<<PA3);
-        //PORTA |= (1<<PA3);
-       // Task_Next();
+		Task_Next();
     }
 }
 
@@ -79,9 +73,8 @@ void a_main()
 	
     // Initialize tasks
 	//Task_Create(ASDF, SYSTEM, 0);
-    Task_Create_Period(Task_ReadJoystick, 0, 5, 1, 0);
-    Task_Create_Period(Task_WriteBluetooth, 0, 5, 1, 2);
-	//Task_Create_Period(Task_Test_Periodic, 0, 5, 1, 0);
+    Task_Create_Period(Task_ReadJoystick, 0, 100, 10, 2);
+    Task_Create_Period(Task_WriteBluetooth, 0, 100, 10, 50);
 	
     //Task_Create(Idle, 10, 0);
 

@@ -460,10 +460,10 @@ ISR(TIMER1_COMPA_vect) {
 			}
 		}	
 	}
-	if(PerioicCount > 1){
-		Disable_Interrupt();
-		OS_Abort();
-	}
+	//if(PerioicCount){
+	//	Disable_Interrupt();
+	//	OS_Abort();
+	//}
 	Task_Next();
 }
 
