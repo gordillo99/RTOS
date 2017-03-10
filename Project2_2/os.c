@@ -98,6 +98,10 @@ volatile int RRCount = 0;
 volatile PD *WaitingQueue[MAXTHREAD];
 volatile int WQCount = 0;
 
+volatile TICK temp_period; //These global variables will be used in Kernel_Create_Task_At()
+volatile TICK temp_wcet;
+volatile TICK temp_offset;
+
 /**
  * Sets up a task's stack with Task_Terminate() at the bottom,
  * The return address of the function
@@ -135,6 +139,12 @@ PID Kernel_Create_Task_At( volatile PD *p, voidfuncptr f, PRIORITY priority, int
 	p->priority = priority;
 	p->arg = arg;
 
+	if(priority == PERIODIC){
+		p->wcet = temp_wcet;
+		p->offset = temp_offset;
+		p->period = temp_period;
+	}
+	
 	Tasks++;
 	pCount++;
 
@@ -142,8 +152,9 @@ PID Kernel_Create_Task_At( volatile PD *p, voidfuncptr f, PRIORITY priority, int
 
 	if (priority == SYSTEM) {
 		enqueue(&p, &SysQueue, &SysCount);
-	} else if (priority == PERIODIC) {
-		//enqueue(&p, &ReadyQueue, &RQCount);
+	} else if (priority == PERIODIC && (p->offset == 0)) {
+		enqueue(&p, &PeriodicQueue, &PerioicCount);
+		p->offset += p->period;
 	} else if (priority == RR) {
 		enqueue(&p, &RRQueue, &RRCount);
 	} else { // temporary code
@@ -186,7 +197,9 @@ static void Kernel_Terminate_Task() {
   */
 static void Dispatch() {
 	Cp = dequeue(&SysQueue, &SysCount);
-
+	if(Cp == NULL) {
+		Cp = dequeue(&PeriodicQueue, &PerioicCount);
+	}
 	if(Cp == NULL) {
 		Cp = dequeue(&RRQueue, &RRCount);
 	}
@@ -241,6 +254,11 @@ static void Next_Kernel_Request() {
 			Cp->response = Kernel_Create_Task( Cp->code, RR, Cp->arg );
 			break;
 		case NEXT:
+			if (Cp->priority == PERIODIC) {
+				Cp->state = READY;
+			}
+			Dispatch();
+			break;
 		case NONE:
 			Cp->state = READY;
 			if (Cp->priority == SYSTEM) {
@@ -322,7 +340,7 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg){
 		if (priority == SYSTEM) {
 			Cp->request = CREATE_SYS;
 		} else if (priority == PERIODIC) {
-
+			Cp->request = CREATE_PERIODIC;
 		} else if (priority == RR) {
 			Cp->request = CREATE_RR;
 		} else {
@@ -339,6 +357,23 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg){
 	  p = Kernel_Create_Task( f, priority, arg );
 	}
 	return p;
+}
+
+PID   Task_Create_System(void (*f)(void), int arg){
+	return Task_Create(f, SYSTEM, arg);
+}
+
+PID   Task_Create_RR(    void (*f)(void), int arg){
+	return Task_Create(f, RR, arg);
+}
+
+PID   Task_Create_Period(void (*f)(void), int arg, TICK period, TICK wcet, TICK offset){
+	if(wcet >= period)
+		OS_Abort();
+	temp_period = period; //These global variables will be used in Kernel_Create_Task_At()
+	temp_wcet = wcet;
+	temp_offset = offset;
+	return Task_Create(f, PERIODIC, arg);
 }
 
 /**
@@ -415,6 +450,20 @@ void setup() {
   * ISR for timer1
   */
 ISR(TIMER1_COMPA_vect) { 
+	int x;
+	for(x = 0; x < MAXTHREAD; x++){
+		if(Process[x].priority == PERIODIC){
+			Process[x].offset -= 1;
+			if(Process[x].offset == 0){
+				enqueue(&(Process[x]), &PeriodicQueue, &PerioicCount);
+				Process[x].offset += Process[x].period;
+			}
+		}	
+	}
+	if(PerioicCount > 1){
+		Disable_Interrupt();
+		OS_Abort();
+	}
 	Task_Next();
 }
 
