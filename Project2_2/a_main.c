@@ -56,8 +56,8 @@ void a_main()
 	
     // Initialize tasks
 	//Task_Create(ASDF, SYSTEM, 0);
-    Task_Create(Task_ReadJoystick, RR, 0);
-    Task_Create(Task_WriteBluetooth, RR, 0);
+    Task_Create(Task_ReadJoystick, PERIODIC, 0, 0, 1, 3);
+    Task_Create(Task_WriteBluetooth, PERIODIC, 0, 1, 1, 3);
 
     //Task_Create(Idle, 10, 0);
 

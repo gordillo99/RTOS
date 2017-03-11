@@ -78,17 +78,13 @@ volatile static unsigned int pCount;
 /** Global tick overflow count */
 volatile unsigned int tickOverflowCount = 0;
 
-/** The ReadyQueue for tasks */
-volatile PD *ReadyQueue[MAXTHREAD];
-volatile int RQCount = 0;
-
 /** The SystemQueue for tasks */
 volatile PD *SysQueue[MAXTHREAD];
 volatile int SysCount = 0;
 
 /** The PeriodicQueue for tasks */
 volatile PD *PeriodicQueue[MAXTHREAD];
-volatile int PerioicCount = 0;
+volatile int PeriodicCount = 0;
 
 /** The RRQueue for tasks */
 volatile PD *RRQueue[MAXTHREAD];
@@ -98,12 +94,18 @@ volatile int RRCount = 0;
 volatile PD *WaitingQueue[MAXTHREAD];
 volatile int WQCount = 0;
 
+static void idle (void)
+{
+	for(;;)
+	{};
+}
+
 /**
  * Sets up a task's stack with Task_Terminate() at the bottom,
  * The return address of the function
  * and dummy data to be popped off when the task first runs
  */
-PID Kernel_Create_Task_At( volatile PD *p, voidfuncptr f, PRIORITY priority, int arg ) {   
+PID Kernel_Create_Task_At( volatile PD *p, voidfuncptr f, PRIORITY priority, int arg, int offset, int wcet, int period) {   
 	unsigned char *sp;
 
 	sp = (unsigned char *) &(p->workSpace[WORKSPACE-1]);
@@ -134,6 +136,11 @@ PID Kernel_Create_Task_At( volatile PD *p, voidfuncptr f, PRIORITY priority, int
 	p->processID = pCount;
 	p->priority = priority;
 	p->arg = arg;
+	p->countdown = -1;
+	p->runningTime = 0;
+	p->offset = offset;
+	p->period = period;
+	p->wcet = wcet;
 
 	Tasks++;
 	pCount++;
@@ -143,11 +150,10 @@ PID Kernel_Create_Task_At( volatile PD *p, voidfuncptr f, PRIORITY priority, int
 	if (priority == SYSTEM) {
 		enqueue(&p, &SysQueue, &SysCount);
 	} else if (priority == PERIODIC) {
-		//enqueue(&p, &ReadyQueue, &RQCount);
+		p->countdown = offset;
+		enqueuePeriodic(&p, &PeriodicQueue, &PeriodicCount);
 	} else if (priority == RR) {
 		enqueue(&p, &RRQueue, &RRCount);
-	} else { // temporary code
-		enqueue(&p, &ReadyQueue, &RQCount);
 	}
 
 	return p->processID;
@@ -156,7 +162,7 @@ PID Kernel_Create_Task_At( volatile PD *p, voidfuncptr f, PRIORITY priority, int
 /**
   *  Create a new task
   */
-static PID Kernel_Create_Task(voidfuncptr f, PRIORITY priority, int arg ) {
+static PID Kernel_Create_Task(voidfuncptr f, PRIORITY priority, int arg, int offset, int wcet, int period) {
 	int x;
 
 	if (Tasks == MAXTHREAD) return;  /* Too many task! */
@@ -166,7 +172,7 @@ static PID Kernel_Create_Task(voidfuncptr f, PRIORITY priority, int arg ) {
 		if (Process[x].state == DEAD) break;
 	}
 
-	unsigned int p = Kernel_Create_Task_At( &(Process[x]), f, priority, arg );
+	unsigned int p = Kernel_Create_Task_At( &(Process[x]), f, priority, arg, offset, wcet, period);
 
 	return p;
 }
@@ -186,17 +192,21 @@ static void Kernel_Terminate_Task() {
   */
 static void Dispatch() {
 	Cp = dequeue(&SysQueue, &SysCount);
+	if (PeriodicCount != 0) {
+		volatile PD *temp = peek(&PeriodicQueue, &PeriodicCount);
+		if (temp->countdown == 0) {
+			if (Cp == NULL) {
+				Cp = dequeue(&PeriodicQueue, &PeriodicCount);
+			} 
+		}
+	}
 
 	if(Cp == NULL) {
 		Cp = dequeue(&RRQueue, &RRCount);
 	}
 
-	if(Cp == NULL) {
-		Cp = dequeue(&ReadyQueue, &RQCount); // original code (temporary)
-	}
-
 	if (Cp == NULL) {
-		OS_Abort();
+		Cp = &Process[0]; // run idle task
 	}
 
 	CurrentSp = Cp->sp;
@@ -229,31 +239,29 @@ static void Next_Kernel_Request() {
 
 		switch(Cp->request){
 		case CREATE:
-			Cp->response = Kernel_Create_Task( Cp->code, Cp->priority, Cp->arg );
+			Cp->response = Kernel_Create_Task( Cp->code, Cp->priority, Cp->arg, -1, -1, -1);
 			break;
 		case CREATE_SYS:
-			Cp->response = Kernel_Create_Task( Cp->code, SYSTEM, Cp->arg );
+			Cp->response = Kernel_Create_Task( Cp->code, SYSTEM, Cp->arg, -1, -1, -1);
 			break;
 		case CREATE_PERIODIC:
-			Cp->response = Kernel_Create_Task( Cp->code, PERIODIC, Cp->arg );
+			Cp->response = Kernel_Create_Task( Cp->code, PERIODIC, Cp->arg, Cp->offset, Cp->wcet, Cp->period);
 			break;
 		case CREATE_RR:
-			Cp->response = Kernel_Create_Task( Cp->code, RR, Cp->arg );
+			Cp->response = Kernel_Create_Task( Cp->code, RR, Cp->arg, -1, -1, -1);
 			break;
 		case NEXT:
-		case NONE:
 			Cp->state = READY;
 			if (Cp->priority == SYSTEM) {
 				enqueue(&Cp, &SysQueue, &SysCount);
 			} else if (Cp->priority == PERIODIC) {
-
+				enqueuePeriodic(&Cp, &PeriodicQueue, &PeriodicCount);
 			} else if (Cp->priority == RR) {
 				enqueue(&Cp, &RRQueue, &RRCount);
-			} else {
-				enqueue(&Cp, &ReadyQueue, &RQCount); // original code (temporary)
 			}
-
 			Dispatch();
+			break;
+		case NONE:
 			break;
 		case TERMINATE:
 			/* deallocate all resources used by this task */
@@ -313,7 +321,7 @@ void OS_Abort() {
 /**
   * Application or kernel level task create to setup system call
   */
-PID Task_Create(voidfuncptr f, PRIORITY priority, int arg){
+PID Task_Create(voidfuncptr f, PRIORITY priority, int arg,  int offset,  int wcet,  int period){
 	unsigned int p;
 
 	if (KernelActive) {
@@ -322,7 +330,8 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg){
 		if (priority == SYSTEM) {
 			Cp->request = CREATE_SYS;
 		} else if (priority == PERIODIC) {
-
+			Cp->request = CREATE_PERIODIC;
+			Cp->countdown = offset + period;
 		} else if (priority == RR) {
 			Cp->request = CREATE_RR;
 		} else {
@@ -332,13 +341,46 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg){
 		Cp->code = f;
 		Cp->priority = priority;
 		Cp->arg = arg;
+		Cp->offset = offset;
+		Cp->wcet = wcet;
+		Cp->period = period;
+		
 		Enter_Kernel();
 		p = Cp->response;
 	} else { 
 	  /* call the RTOS function directly */
-	  p = Kernel_Create_Task( f, priority, arg );
+	  p = Kernel_Create_Task( f, priority, arg, -1, -1, -1);
 	}
 	return p;
+}
+
+PID Task_Create_System(void (*f)(void), int arg){		
+	return Task_Create(f, SYSTEM, arg, -1,-1,-1);		
+}		
+PID Task_Create_RR(void (*f)(void), int arg){		
+	return Task_Create(f, RR, arg, -1,-1,-1);		
+}		
+PID Task_Create_Period(void (*f)(void), int arg, TICK period, TICK wcet, TICK offset){		
+	if(wcet >= period) OS_Abort();			
+	return Task_Create(f, PERIODIC, arg, offset, wcet, period);		
+}		
+/**		
+  * Application or kernel level task create to setup system call		
+  */		
+PID Task_Create_Idle(){		
+	unsigned int p;		
+	if (KernelActive) {		
+		Disable_Interrupt();		
+		Cp->code = idle;		
+		Cp->priority = IDLE;		
+		Cp->arg = 0;		
+		Enter_Kernel();		
+		p = Cp->response;		
+	} else { 		
+	  /* call the RTOS function directly */		
+	  p = Kernel_Create_Task(idle, IDLE, 0, -1, -1, -1);		
+	}		
+	return p;		
 }
 
 /**
@@ -347,7 +389,14 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg){
 void Task_Next() {
 	if (KernelActive) {
 		Disable_Interrupt();
-		Cp->request = NEXT;
+		if (Cp->priority == SYSTEM) Cp->request = NONE; 
+		else if (Cp->priority == PERIODIC) {
+			if (Cp->runningTime == Cp->wcet || SysCount > 0) {
+				Cp->countdown = Cp->period - Cp->runningTime;
+				Cp->runningTime = 0;
+				Cp->request = NEXT;
+			} else Cp->request = NONE; 
+		} else Cp->request = NEXT;
 		Enter_Kernel();
 	}
 }
@@ -415,6 +464,15 @@ void setup() {
   * ISR for timer1
   */
 ISR(TIMER1_COMPA_vect) { 
+	int i;
+	if (Cp->priority == PERIODIC) {
+		Cp->runningTime++;
+	}
+
+	for (i = PeriodicCount-1; i >= 0; i--) {
+		PeriodicQueue[i]->countdown -= 1;
+	}
+
 	Task_Next();
 }
 
@@ -440,7 +498,8 @@ PORTA &= ~(1<<PA3);
 	setup();
 
 	OS_Init();
-	Task_Create(a_main, SYSTEM, 1);
+	Task_Create_Idle();
+	Task_Create_System(a_main, 1);
 	OS_Start();
 }
 
