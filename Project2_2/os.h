@@ -10,6 +10,7 @@
 #define SYSTEM 3
 #define PERIODIC 2
 #define RR 1
+#define IDLE 4
 
 #ifndef NULL
 #define NULL          0   /* undefined */
@@ -71,13 +72,15 @@ typedef struct ProcessDescriptor {
     unsigned int response;
     TICK wakeTickOverflow;
     TICK wakeTick;
-	TICK period, wcet, offset, elapsed;
+	TICK period, wcet, offset;
+	int countdown;
+	unsigned int runningTime;
 } PD;
 
 // void OS_Init(void);      redefined as main()
 void OS_Abort(void);
 
-PID  Task_Create( void (*f)(void), PRIORITY py, int arg);
+PID  Task_Create( void (*f)(void), PRIORITY py, int arg,  int offset,  int wcet,  int period);
 void Task_Terminate(void);
 void Task_Next(void); // Same as yield
 int  Task_GetArg( PID p );
