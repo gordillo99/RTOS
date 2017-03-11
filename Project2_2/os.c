@@ -389,13 +389,29 @@ PID Task_Create_Idle(){
 void Task_Next() {
 	if (KernelActive) {
 		Disable_Interrupt();
-		if (Cp->priority == SYSTEM) Cp->request = NONE; 
+		if (Cp->priority == PERIODIC) {
+			Cp->countdown = Cp->period - Cp->runningTime;
+			Cp->runningTime = 0;
+		}
+		Cp->request = NEXT;
+		Enter_Kernel();
+	}
+}
+
+
+/*
+	Function called by ISR to schedule next task according to current priority
+*/
+void Run_Next() {
+	if (KernelActive) {
+		Disable_Interrupt();
+		if (Cp->priority == SYSTEM) Cp->request = NONE;
 		else if (Cp->priority == PERIODIC) {
 			if (Cp->runningTime == Cp->wcet || SysCount > 0) {
 				Cp->countdown = Cp->period - Cp->runningTime;
 				Cp->runningTime = 0;
 				Cp->request = NEXT;
-			} else Cp->request = NONE; 
+			} else Cp->request = NONE;
 		} else Cp->request = NEXT;
 		Enter_Kernel();
 	}
@@ -473,7 +489,7 @@ ISR(TIMER1_COMPA_vect) {
 		PeriodicQueue[i]->countdown -= 1;
 	}
 
-	Task_Next();
+	Run_Next();
 }
 
 /**
