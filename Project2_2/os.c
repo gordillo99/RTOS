@@ -90,9 +90,9 @@ volatile int PeriodicCount = 0;
 volatile PD *RRQueue[MAXTHREAD];
 volatile int RRCount = 0;
 
-/** The WaitingQueue for tasks */
-volatile PD *WaitingQueue[MAXTHREAD];
-volatile int WQCount = 0;
+
+volatile CD *ChannelArray[MAXCHAN];
+volatile unsigned int Channels = 0;
 
 static void idle (void)
 {
@@ -263,6 +263,11 @@ static void Next_Kernel_Request() {
 			break;
 		case NONE:
 			break;
+		case SEND:
+			break;
+		case RECEIVE:
+			kernel_receive();
+			break;
 		case TERMINATE:
 			/* deallocate all resources used by this task */
 			Kernel_Terminate_Task();
@@ -295,6 +300,12 @@ void OS_Init() {
 		memset(&(Process[x]),0,sizeof(PD));
 		Process[x].state = DEAD;
 		Process[x].processID = 0;
+	}
+
+	for (x = 0; x < MAXCHAN; x++) {
+		memset(&(ChannelArray[x]),0,sizeof(CD));
+		ChannelArray[x]->state = UNITIALIZED;
+		ChannelArray[x]->channelID = 0;
 	}
 }
 
@@ -499,18 +510,93 @@ ISR(TIMER3_COMPA_vect) { // PERIOD: 1 s
 	tickOverflowCount += 1;
 }
 
+/*
+ * A CHAN is a one-way communication channel between at least two tasks. It must be
+ * initialized before its use. Chan_Init() returns a CHAN if successful; otherwise
+ * it returns NULL.
+ */
+
+ CHAN Chan_Init() {
+	int x;
+
+	if (Channels == MAXCHAN) return;  /* Too many task! */
+
+	/* find a DEAD PD that we can use  */
+	for (x = 0; x < MAXCHAN; x++) {
+		if (ChannelArray[x]->state == UNITIALIZED) {
+			ChannelArray[x]->state = USED;
+			ChannelArray[x]->channelID = x;
+			ChannelArray[x]->numberReceivers = 0;
+			break;
+		}
+	}
+
+	if (x == MAXCHAN) return NULL;
+	return ChannelArray[x]->channelID;
+ }
+
+ /*
+ * A CHAN has no buffer. It is a mechanism allowing a sender and one or more receiver
+ * to synchronize on communication. A sender calling Send() must block if there are no
+ * receivers waiting; one or more receiver calling Recv() must block if there is no
+ * sender waiting. When a sender and one or more receiver are ready to communicate,
+ * the value "v" from the sender is returned to each waiting receiver. That is, the
+ * communication occurs when both sender and the receiver(s) are ready.
+ * Thus, communication is synchronous. Mutliple receivers can receive from the same 
+ * CHAN. When a sender is ready to communicate with multiple receivers, all receivers
+ * will receive the same value at the same time, i.e., a Send() is a multi-cast operation
+ * when multiple receivers are waiting. However, when a sender is waiting, then the next
+ * receiver will communicate with the waiting sender only.
+ *
+ * It is an error if multiple senders send on the same CHAN. 
+ * As a result, the RTOS may abort when this occurs.
+ * Periodic tasks are NOT allowed to use blocking Send() or Recv().
+ * 
+ */
+void Send( CHAN ch, int v ) {
+	if (Cp->priority == PERIODIC) OS_Abort(); // periodic tasks are not allowed to use csp
+	//COPY PSEUDO CODE
+
+}
+
+int Recv(CHAN ch) {
+	if (Cp->priority == PERIODIC) OS_Abort(); // periodic tasks are not allowed to use csp 
+	Cp->request = RECEIVE;
+	Cp->receiverChannel = ch;
+	Enter_Kernel();
+	return Cp->retval;
+}
+
+void kernel_receive() {
+	if (ChannelArray[Cp->receiverChannel]->sender == NULL) { // no sender waiting
+		Cp->state = BLOCKED;
+		enqueue(&Cp, &ChannelArray[Cp->receiverChannel]->receivers, &ChannelArray[Cp->receiverChannel]->numberReceivers);
+		Dispatch();
+	} else { // sender is waiting
+		Cp->val = ChannelArray[Cp->receiverChannel]->val;
+		if (Cp->priority == SYSTEM) {
+			enqueue(&Cp, &SysQueue, &SysCount);
+		} else if (Cp->priority == RR) {
+			enqueue(&Cp, &RRQueue, &RRCount);
+		}
+		ChannelArray[Cp->receiverChannel]->sender = NULL;
+	}
+}
+
+
 /**
   * This function boots the OS and creates the first task: a_main
   */
 void main() {
-DDRA |= (1<<PA4);
-PORTA &= ~(1<<PA4);
+	DDRA |= (1<<PA4);
+	PORTA &= ~(1<<PA4);
 
-DDRA |= (1<<PA5);
-PORTA &= ~(1<<PA5);
+	DDRA |= (1<<PA5);
+	PORTA &= ~(1<<PA5);
 
-DDRA |= (1<<PA3);
-PORTA &= ~(1<<PA3);
+	DDRA |= (1<<PA3);
+	PORTA &= ~(1<<PA3);
+
 	setup();
 
 	OS_Init();

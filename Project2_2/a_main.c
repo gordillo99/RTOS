@@ -25,30 +25,22 @@ void Task_ReadJoystick()
 
 void ASDF()
 {
-/*
+	
 	int x = 0;
-	for(; x < 100000; x++)
-	{
-		if (x < 10000000/2) {
-			
-			DDRA |= (1<<PA4);
-			PORTA ^= (1<<PA4);
-			//Task_Next();
-		} else {
-			Task_Terminate();
-		}
-
+	for (;x < 10000;x++) {
+		PORTA |= (1<<PA5);
+		PORTA &= ~(1<<PA5);
 	}
-	*/
-	PORTA ^= (1<<PA4);
-	_delay_ms(2000);
-	PORTA ^= (1<<PA4);
 	Task_Terminate();
 }
 
-
-void Idle() {
-    for(;;) {}
+void ASDF2()
+{
+	for (;;) {
+		PORTA |= (1<<PA4);
+		PORTA &= ~(1<<PA4);
+	}
+	
 }
 
 void a_main()
@@ -57,9 +49,9 @@ void a_main()
     // Initialize tasks
 	//Task_Create(ASDF, SYSTEM, 0);
     Task_Create(Task_ReadJoystick, PERIODIC, 0, 0, 1, 3);
-    Task_Create(Task_WriteBluetooth, PERIODIC, 0, 1, 1, 3);
-
-    //Task_Create(Idle, 10, 0);
+    Task_Create(Task_WriteBluetooth, PERIODIC, 0, 2, 1, 3);
+	Task_Create(ASDF2, RR, 0, -1, -1, -1);
+	Task_Create(ASDF, SYSTEM, 0, -1, -1, -1);
 
     // Kill the initialization task
     Task_Terminate();
