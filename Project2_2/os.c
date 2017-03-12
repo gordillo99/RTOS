@@ -515,7 +515,7 @@ ISR(TIMER3_COMPA_vect) { // PERIOD: 1 s
  CHAN Chan_Init() {
 	int x;
 
-	if (Channels == MAXCHAN) return;  /* Too many task! */
+	if (Channels == MAXCHAN) return NULL;  /* Too many task! */
 
 	/* find an UNITIALIZED CD that we can use  */
 	for (x = 0; x < MAXCHAN; x++) {
@@ -539,19 +539,20 @@ void Send(CHAN ch, int v) {
 }
 
 void kernel_send() {
-	if (ChannelArray[Cp->senderChannel - 1].numberReceivers == 0) { // no sender waiting
+	if (ChannelArray[Cp->senderChannel - 1].numberReceivers == 0) { // no receivers waiting
 		if (ChannelArray[Cp->senderChannel - 1].sender == NULL) ChannelArray[Cp->senderChannel - 1].sender = Cp;
-
 		else OS_Abort(); // cant have more than 1 sender
+
 		Cp->state = BLOCKED;
 		ChannelArray[Cp->senderChannel - 1].val = Cp->val;
 		Dispatch();
-	} else {
+	} else { //receivers are waiting
 		if (ChannelArray[Cp->senderChannel - 1].sender != NULL) OS_Abort(); // cant have more than 1 sender
 		int l;
 		for (l = ChannelArray[Cp->senderChannel - 1].numberReceivers - 1; l >= 0; l--)  {
 			ChannelArray[Cp->senderChannel - 1].receivers[l]->state = READY;
 			ChannelArray[Cp->senderChannel - 1].receivers[l]->val = Cp->val;
+
 			if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == SYSTEM) {
 				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &SysQueue, &SysCount);
 			} else if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == RR) {
@@ -580,6 +581,7 @@ void kernel_receive() {
 	} else { // sender is waiting
 		ChannelArray[Cp->receiverChannel - 1].sender->state = READY;
 		Cp->val = ChannelArray[Cp->receiverChannel - 1].val;
+
 		if (ChannelArray[Cp->receiverChannel - 1].sender->priority == SYSTEM) {
 			enqueue(&ChannelArray[Cp->receiverChannel - 1].sender, &SysQueue, &SysCount);
 		} else if (ChannelArray[Cp->receiverChannel - 1].sender->priority == RR) {
@@ -590,22 +592,31 @@ void kernel_receive() {
 	}
 }
 
-
 /**
   * This function boots the OS and creates the first task: a_main
   */
 void main() {
-	DDRA |= (1<<PA4);
-	PORTA &= ~(1<<PA4);
-
-	DDRA |= (1<<PA5);
-	PORTA &= ~(1<<PA5);
-
+	//pin 25
 	DDRA |= (1<<PA3);
 	PORTA &= ~(1<<PA3);
 
-	setup();
+	//pin 26
+	DDRA |= (1<<PA4);
+	PORTA &= ~(1<<PA4);
 
+	//pin 27
+	DDRA |= (1<<PA5);
+	PORTA &= ~(1<<PA5);
+
+	//pin 28
+	DDRA |= (1<<PA6);
+	PORTA &= ~(1<<PA6);
+
+	//pin 29
+	DDRA |= (1<<PA7);
+	PORTA &= ~(1<<PA7);
+
+	setup();
 	OS_Init();
 	Task_Create_Idle();
 	Task_Create_System(a_main, 1);
