@@ -16,9 +16,6 @@ void uart_start(void) {
 
 	UCSR0B |= (1 << RXCIE0); //recieve data interrupt, makes sure we don't loose data
 
-	#if DEBUG
-	uart_write("0x04 - UART is up...");
-	#endif
 }
 
 void uart_write(char *data) {
