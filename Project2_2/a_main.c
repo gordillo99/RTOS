@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "os.h"
+#include "./tests/TEST_too_many_tasks.h"
 
 /***** Core System Tasks *****/
 void ASDF1()
@@ -55,12 +56,12 @@ void a_main()
 	
     // Initialize tasks
 	//Task_Create(ASDF, SYSTEM, 0);
-    Task_Create(ASDF1, PERIODIC, 0, 0, 2, 10);
-    Task_Create(ASDF2, PERIODIC, 0, 4, 1, 10);
-	Task_Create(ASDF3, PERIODIC, 0, 8, 1, 10);
+    //Task_Create(ASDF1, PERIODIC, 0, 0, 2, 10);
+    //Task_Create(ASDF2, PERIODIC, 0, 4, 1, 10);
+	//Task_Create(ASDF3, PERIODIC, 0, 8, 1, 10);
 	//Task_Create(ASDF4, PERIODIC, 0, -1, -1, -1);
-	Task_Create(ASDF5, RR, 0, -1, -1, -1);
-
+	//Task_Create(ASDF5, RR, 0, -1, -1, -1);
+	Task_Create_System(test_too_many_tasks,0);
     // Kill the initialization task
     Task_Terminate();
 }
