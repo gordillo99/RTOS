@@ -90,9 +90,8 @@ volatile int PeriodicCount = 0;
 volatile PD *RRQueue[MAXTHREAD];
 volatile int RRCount = 0;
 
-/** The WaitingQueue for tasks */
-volatile PD *WaitingQueue[MAXTHREAD];
-volatile int WQCount = 0;
+volatile static CD ChannelArray[MAXCHAN];
+volatile unsigned int Channels = 0;
 
 static void idle (void)
 {
@@ -263,6 +262,12 @@ static void Next_Kernel_Request() {
 			break;
 		case NONE:
 			break;
+		case SEND:
+			kernel_send();
+			break;
+		case RECEIVE:
+			kernel_receive();
+			break;
 		case TERMINATE:
 			/* deallocate all resources used by this task */
 			Kernel_Terminate_Task();
@@ -295,6 +300,12 @@ void OS_Init() {
 		memset(&(Process[x]),0,sizeof(PD));
 		Process[x].state = DEAD;
 		Process[x].processID = 0;
+	}
+
+	for (x = 0; x < MAXCHAN; x++) {
+		memset(&(ChannelArray[x]),0,sizeof(CD));
+		ChannelArray[x].state = UNITIALIZED;
+		ChannelArray[x].channelID = (CHAN) x+1;
 	}
 }
 
@@ -389,13 +400,28 @@ PID Task_Create_Idle(){
 void Task_Next() {
 	if (KernelActive) {
 		Disable_Interrupt();
-		if (Cp->priority == SYSTEM) Cp->request = NONE; 
+		if (Cp->priority == PERIODIC) {
+			Cp->countdown = Cp->period - Cp->runningTime;
+			Cp->runningTime = 0;
+		}
+		Cp->request = NEXT;
+		Enter_Kernel();
+	}
+}
+
+/*
+	Function called by ISR to schedule next task according to current priority
+*/
+void Run_Next() {
+	if (KernelActive) {
+		Disable_Interrupt();
+		if (Cp->priority == SYSTEM) Cp->request = NONE;
 		else if (Cp->priority == PERIODIC) {
 			if (Cp->runningTime == Cp->wcet || SysCount > 0) {
 				Cp->countdown = Cp->period - Cp->runningTime;
 				Cp->runningTime = 0;
 				Cp->request = NEXT;
-			} else Cp->request = NONE; 
+			} else Cp->request = NONE;
 		} else Cp->request = NEXT;
 		Enter_Kernel();
 	}
@@ -469,11 +495,8 @@ ISR(TIMER1_COMPA_vect) {
 		Cp->runningTime++;
 	}
 
-	for (i = PeriodicCount-1; i >= 0; i--) {
-		PeriodicQueue[i]->countdown -= 1;
-	}
-
-	Task_Next();
+	for (i = PeriodicCount-1; i >= 0; i--) PeriodicQueue[i]->countdown -= 1;
+	Run_Next();
 }
 
 /**
@@ -483,20 +506,117 @@ ISR(TIMER3_COMPA_vect) { // PERIOD: 1 s
 	tickOverflowCount += 1;
 }
 
+/*
+ * A CHAN is a one-way communication channel between at least two tasks. It must be
+ * initialized before its use. Chan_Init() returns a CHAN if successful; otherwise
+ * it returns NULL.
+ */
+
+ CHAN Chan_Init() {
+	int x;
+
+	if (Channels == MAXCHAN) return NULL;  /* Too many task! */
+
+	/* find an UNITIALIZED CD that we can use  */
+	for (x = 0; x < MAXCHAN; x++) {
+		if (ChannelArray[x].state == UNITIALIZED) {
+			ChannelArray[x].state = USED;
+			ChannelArray[x].numberReceivers = 0;
+			break;
+		}
+	}
+
+	if (x == MAXCHAN) return NULL;
+	return ChannelArray[x].channelID;
+ }
+
+void Send(CHAN ch, int v) {
+	if (Cp->priority == PERIODIC) OS_Abort(); // periodic tasks are not allowed to use csp
+	Cp->request = SEND;
+	Cp->senderChannel = ch;
+	Cp->val = v;
+	Enter_Kernel();
+}
+
+void kernel_send() {
+	if (ChannelArray[Cp->senderChannel - 1].numberReceivers == 0) { // no receivers waiting
+		if (ChannelArray[Cp->senderChannel - 1].sender == NULL) ChannelArray[Cp->senderChannel - 1].sender = Cp;
+		else OS_Abort(); // cant have more than 1 sender
+
+		Cp->state = BLOCKED;
+		ChannelArray[Cp->senderChannel - 1].val = Cp->val;
+		Dispatch();
+	} else { //receivers are waiting
+		if (ChannelArray[Cp->senderChannel - 1].sender != NULL) OS_Abort(); // cant have more than 1 sender
+		int l;
+		for (l = ChannelArray[Cp->senderChannel - 1].numberReceivers - 1; l >= 0; l--)  {
+			ChannelArray[Cp->senderChannel - 1].receivers[l]->state = READY;
+			ChannelArray[Cp->senderChannel - 1].receivers[l]->val = Cp->val;
+
+			if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == SYSTEM) {
+				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &SysQueue, &SysCount);
+			} else if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == RR) {
+				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &RRQueue, &RRCount);
+			}
+			ChannelArray[Cp->senderChannel - 1].receivers[l] = NULL;
+			ChannelArray[Cp->senderChannel - 1].numberReceivers--;
+		}
+		ChannelArray[Cp->senderChannel - 1].val = NULL;
+	}
+}
+
+int Recv(CHAN ch) {
+	if (Cp->priority == PERIODIC) OS_Abort(); // periodic tasks are not allowed to use csp 
+	Cp->request = RECEIVE;
+	Cp->receiverChannel = ch;
+	Enter_Kernel();
+	return Cp->val;
+}
+
+void kernel_receive() {
+	if (ChannelArray[Cp->receiverChannel - 1].sender == NULL) { // no sender waiting
+		Cp->state = BLOCKED;
+		enqueue(&Cp, &ChannelArray[Cp->receiverChannel - 1].receivers, &ChannelArray[Cp->receiverChannel - 1].numberReceivers);
+		Dispatch();
+	} else { // sender is waiting
+		ChannelArray[Cp->receiverChannel - 1].sender->state = READY;
+		Cp->val = ChannelArray[Cp->receiverChannel - 1].val;
+
+		if (ChannelArray[Cp->receiverChannel - 1].sender->priority == SYSTEM) {
+			enqueue(&ChannelArray[Cp->receiverChannel - 1].sender, &SysQueue, &SysCount);
+		} else if (ChannelArray[Cp->receiverChannel - 1].sender->priority == RR) {
+			enqueue(&ChannelArray[Cp->receiverChannel - 1].sender, &RRQueue, &RRCount);
+		}
+		ChannelArray[Cp->receiverChannel - 1].sender = NULL;
+		ChannelArray[Cp->senderChannel - 1].val = NULL;
+	}
+}
+
 /**
   * This function boots the OS and creates the first task: a_main
   */
 void main() {
-DDRA |= (1<<PA4);
-PORTA &= ~(1<<PA4);
+	//pin 25
+	DDRA |= (1<<PA3);
+	PORTA &= ~(1<<PA3);
 
-DDRA |= (1<<PA5);
-PORTA &= ~(1<<PA5);
+	//pin 26
+	DDRA |= (1<<PA4);
+	PORTA &= ~(1<<PA4);
 
-DDRA |= (1<<PA3);
-PORTA &= ~(1<<PA3);
+	//pin 27
+	DDRA |= (1<<PA5);
+	PORTA &= ~(1<<PA5);
+
+	//pin 28
+	DDRA |= (1<<PA6);
+	PORTA &= ~(1<<PA6);
+
+	//pin 29
+	DDRA |= (1<<PA7);
+	PORTA &= ~(1<<PA7);
+
 	setup();
-
 	OS_Init();
 	Task_Create_Idle();
 	Task_Create_System(a_main, 1);

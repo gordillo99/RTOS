@@ -38,7 +38,7 @@ typedef enum process_states {
     DEAD = 0,
     READY,
     RUNNING,
-    WAITING,
+    BLOCKED,
     TERMINATED
 } PROCESS_STATES;
 
@@ -53,7 +53,15 @@ typedef enum kernel_request_type {
 	CREATE_PERIODIC,
     NEXT,
     TERMINATE,
+	SEND,
+	RECEIVE,
 } KERNEL_REQUEST_TYPE;
+
+typedef enum channel_states {
+	UNITIALIZED,
+	BLOCKING,
+	USED,
+} CHANNEL_STATES;
 
 /**
   * Each task is represented by a process descriptor, which contains all
@@ -71,11 +79,23 @@ typedef struct ProcessDescriptor {
     KERNEL_REQUEST_TYPE request;
     unsigned int response;
     TICK wakeTickOverflow;
-    TICK wakeTick;
 	TICK period, wcet, offset;
 	int countdown;
 	unsigned int runningTime;
+	int retval;
+	CHAN senderChannel;
+	CHAN receiverChannel;
+	int val;
 } PD;
+
+typedef struct ChannelDescriptor {
+	CHAN channelID;
+	PD * sender;
+	PD * receivers[MAXTHREAD];
+	unsigned int numberReceivers;
+	CHANNEL_STATES state;
+	unsigned int val;
+} CD;
 
 // void OS_Init(void);      redefined as main()
 void OS_Abort(void);

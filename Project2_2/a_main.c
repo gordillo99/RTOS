@@ -3,52 +3,51 @@
 #include "os.h"
 
 /***** Core System Tasks *****/
-void Task_WriteBluetooth()
+void ASDF1()
 {
-    for(;;){
-		DDRA |= (1<<PA3);
+	for (;;) {
+		//pin 25
+		PORTA |= (1<<PA3);
 		PORTA &= ~(1<<PA3);
-        //Task_Next();
-    }
-}
-
-
-void Task_ReadJoystick()
-{
-    for(;;)
-    {
-        DDRA |= (1<<PA3);
-        PORTA |= (1<<PA3);
-        //Task_Next();
-    }
-}
-
-void ASDF()
-{
-/*
-	int x = 0;
-	for(; x < 100000; x++)
-	{
-		if (x < 10000000/2) {
-			
-			DDRA |= (1<<PA4);
-			PORTA ^= (1<<PA4);
-			//Task_Next();
-		} else {
-			Task_Terminate();
-		}
-
 	}
-	*/
-	PORTA ^= (1<<PA4);
-	_delay_ms(2000);
-	PORTA ^= (1<<PA4);
-	Task_Terminate();
 }
 
+void ASDF2()
+{
+	for (;;) {
+		//pin 26
+		PORTA |= (1<<PA4);
+		PORTA &= ~(1<<PA4);
+	}
+	
+}
 
-void Idle() {
-    for(;;) {}
+void ASDF3()
+{
+	for (;;) {
+		//pin 27
+		PORTA |= (1<<PA5);
+		PORTA &= ~(1<<PA5);
+	}
+	
+}
+
+void ASDF4()
+{
+	for(;;){
+		//pin 28
+		PORTA |= (1<<PA6);
+		PORTA &= ~(1<<PA6);
+	}
+}
+
+void ASDF5()
+{
+	for(;;)
+	{
+		PORTA |= (1<<PA7);
+		PORTA &= ~(1<<PA7);
+	}
 }
 
 void a_main()
@@ -56,10 +55,11 @@ void a_main()
 	
     // Initialize tasks
 	//Task_Create(ASDF, SYSTEM, 0);
-    Task_Create(Task_ReadJoystick, PERIODIC, 0, 0, 1, 3);
-    Task_Create(Task_WriteBluetooth, PERIODIC, 0, 1, 1, 3);
-
-    //Task_Create(Idle, 10, 0);
+    Task_Create(ASDF1, PERIODIC, 0, 0, 2, 10);
+    Task_Create(ASDF2, PERIODIC, 0, 4, 1, 10);
+	Task_Create(ASDF3, PERIODIC, 0, 8, 1, 10);
+	//Task_Create(ASDF4, PERIODIC, 0, -1, -1, -1);
+	Task_Create(ASDF5, RR, 0, -1, -1, -1);
 
     // Kill the initialization task
     Task_Terminate();
