@@ -8,7 +8,7 @@ volatile int isFull(volatile int *QCount) {
 }
 
 /*
- *  Checks if queue is empty, READY QUEUE SHOULD NEVER BE EMPTY
+ *  Checks if queue is empty
  */
 volatile int isEmpty(volatile int *QCount) {
     return *QCount == 0;
@@ -32,12 +32,13 @@ void enqueue(volatile PD **p, volatile PD **Queue, volatile int *QCount) {
         temp = Queue[i];
     }
 
-    Queue[i+1] = *p;
+    //Queue[i+1] = *p; //original code
+	Queue[0] = *p;
     (*QCount)++;
 }
 
 /*
- *  Return the first element of the Ready Queue
+ *  Return the first element of the Queue
  */
 volatile PD *dequeue(volatile PD **Queue, volatile int *QCount) {
 
@@ -46,6 +47,7 @@ volatile PD *dequeue(volatile PD **Queue, volatile int *QCount) {
    }
 
    volatile PD *result = (Queue[(*QCount)-1]);
+   Queue[(*QCount)-1] = 0; // this line was added to remove elements from the queue
    (*QCount)--;
 
    return result;

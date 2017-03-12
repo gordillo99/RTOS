@@ -90,7 +90,7 @@ typedef struct ProcessDescriptor {
 
 typedef struct ChannelDescriptor {
 	CHAN channelID;
-	PID sender;
+	PD * sender;
 	PD * receivers[MAXTHREAD];
 	unsigned int numberReceivers;
 	CHANNEL_STATES state;
