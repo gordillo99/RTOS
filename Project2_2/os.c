@@ -265,6 +265,9 @@ static void Next_Kernel_Request() {
 		case SEND:
 			kernel_send();
 			break;
+		case ASYNC_SEND:
+			kernel_async_send();
+			break;
 		case RECEIVE:
 			kernel_receive();
 			break;
@@ -346,7 +349,7 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg,  int offset,  int wce
 		} else if (priority == RR) {
 			Cp->request = CREATE_RR;
 		} else {
-			Cp->request = CREATE; // original code (temporary)
+			OS_Abort();
 		}
 
 		Cp->code = f;
@@ -555,7 +558,7 @@ void kernel_send() {
 
 			if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == SYSTEM) {
 				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &SysQueue, &SysCount);
-			} else if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == RR) {
+				} else if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == RR) {
 				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &RRQueue, &RRCount);
 			}
 			ChannelArray[Cp->senderChannel - 1].receivers[l] = NULL;
@@ -566,7 +569,7 @@ void kernel_send() {
 }
 
 int Recv(CHAN ch) {
-	if (Cp->priority == PERIODIC) OS_Abort(); // periodic tasks are not allowed to use csp 
+	if (Cp->priority == PERIODIC) OS_Abort(); // periodic tasks are not allowed to use csp
 	Cp->request = RECEIVE;
 	Cp->receiverChannel = ch;
 	Enter_Kernel();
@@ -578,16 +581,48 @@ void kernel_receive() {
 		Cp->state = BLOCKED;
 		enqueue(&Cp, &ChannelArray[Cp->receiverChannel - 1].receivers, &ChannelArray[Cp->receiverChannel - 1].numberReceivers);
 		Dispatch();
-	} else { // sender is waiting
+		} else { // sender is waiting
 		ChannelArray[Cp->receiverChannel - 1].sender->state = READY;
 		Cp->val = ChannelArray[Cp->receiverChannel - 1].val;
 
 		if (ChannelArray[Cp->receiverChannel - 1].sender->priority == SYSTEM) {
 			enqueue(&ChannelArray[Cp->receiverChannel - 1].sender, &SysQueue, &SysCount);
-		} else if (ChannelArray[Cp->receiverChannel - 1].sender->priority == RR) {
+			} else if (ChannelArray[Cp->receiverChannel - 1].sender->priority == RR) {
 			enqueue(&ChannelArray[Cp->receiverChannel - 1].sender, &RRQueue, &RRCount);
 		}
 		ChannelArray[Cp->receiverChannel - 1].sender = NULL;
+		ChannelArray[Cp->senderChannel - 1].val = NULL;
+	}
+}
+
+void Write(CHAN ch, int v) {
+	if (Cp->priority == PERIODIC) OS_Abort(); // periodic tasks are not allowed to use csp
+	Cp->request = ASYNC_SEND;
+	Cp->senderChannel = ch;
+	Cp->val = v;
+	Enter_Kernel();
+}
+
+void kernel_async_send() {
+	if (ChannelArray[Cp->senderChannel - 1].numberReceivers == 0) { // no receivers waiting
+		if (ChannelArray[Cp->senderChannel - 1].sender == NULL) ChannelArray[Cp->senderChannel - 1].sender = Cp;
+		else OS_Abort(); // cant have more than 1 sender
+		return; // return without blocking
+	} else { //receivers are waiting
+		if (ChannelArray[Cp->senderChannel - 1].sender != NULL) OS_Abort(); // cant have more than 1 sender
+		int l;
+		for (l = ChannelArray[Cp->senderChannel - 1].numberReceivers - 1; l >= 0; l--)  {
+			ChannelArray[Cp->senderChannel - 1].receivers[l]->state = READY;
+			ChannelArray[Cp->senderChannel - 1].receivers[l]->val = Cp->val;
+
+			if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == SYSTEM) {
+				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &SysQueue, &SysCount);
+				} else if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == RR) {
+				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &RRQueue, &RRCount);
+			}
+			ChannelArray[Cp->senderChannel - 1].receivers[l] = NULL;
+			ChannelArray[Cp->senderChannel - 1].numberReceivers--;
+		}
 		ChannelArray[Cp->senderChannel - 1].val = NULL;
 	}
 }

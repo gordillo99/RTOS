@@ -6,6 +6,8 @@
 /***** Core System Tasks *****/
 void ASDF1()
 {
+	
+	//Recv(1);
 	for (;;) {
 		//pin 25
 		PORTA |= (1<<PA3);
@@ -15,6 +17,7 @@ void ASDF1()
 
 void ASDF2()
 {
+	//Recv(1);
 	for (;;) {
 		//pin 26
 		PORTA |= (1<<PA4);
@@ -25,6 +28,7 @@ void ASDF2()
 
 void ASDF3()
 {
+	//Recv(1);
 	for (;;) {
 		//pin 27
 		PORTA |= (1<<PA5);
@@ -35,6 +39,8 @@ void ASDF3()
 
 void ASDF4()
 {
+	Chan_Init();
+	Write(1, 69);
 	for(;;){
 		//pin 28
 		PORTA |= (1<<PA6);
@@ -61,7 +67,10 @@ void a_main()
 	//Task_Create(ASDF3, PERIODIC, 0, 8, 1, 10);
 	//Task_Create(ASDF4, PERIODIC, 0, -1, -1, -1);
 	//Task_Create(ASDF5, RR, 0, -1, -1, -1);
-	Task_Create_System(test_too_many_tasks,0);
+	//Task_Create_System(ASDF1,0);
+	//Task_Create_System(ASDF2,0);
+	//Task_Create_System(ASDF3,0);
+	Task_Create_RR(ASDF4,0);
     // Kill the initialization task
     Task_Terminate();
 }

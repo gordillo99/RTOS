@@ -54,6 +54,7 @@ typedef enum kernel_request_type {
     NEXT,
     TERMINATE,
 	SEND,
+	ASYNC_SEND,
 	RECEIVE,
 } KERNEL_REQUEST_TYPE;
 
