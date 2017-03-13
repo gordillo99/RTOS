@@ -32,14 +32,17 @@ LIB_DEP:=
 LINKER_SCRIPT_DEP:=
 
 # Every subdirectory with source files must be described here
-SUBDIRS := 
+SUBDIRS :=  \
+../tests/
 
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
 ../a_main.c \
 ../os.c \
-../queue.c
+../queue.c \
+../tests/TEST_too_many_tasks.c \
+../uart.c
 
 
 PREPROCESSING_SRCS +=  \
@@ -53,25 +56,33 @@ OBJS +=  \
 cswitch.o \
 a_main.o \
 os.o \
-queue.o
+queue.o \
+tests/TEST_too_many_tasks.o \
+uart.o
 
 OBJS_AS_ARGS +=  \
 cswitch.o \
 a_main.o \
 os.o \
-queue.o
+queue.o \
+tests/TEST_too_many_tasks.o \
+uart.o
 
 C_DEPS +=  \
 cswitch.d \
 a_main.d \
 os.d \
-queue.d
+queue.d \
+tests/TEST_too_many_tasks.d \
+uart.d
 
 C_DEPS_AS_ARGS +=  \
 cswitch.d \
 a_main.d \
 os.d \
-queue.d
+queue.d \
+tests/TEST_too_many_tasks.d \
+uart.d
 
 OUTPUT_FILE_PATH +=Project2_2.elf
 
@@ -94,7 +105,18 @@ LINKER_SCRIPT_DEP+=
 
 
 
+
+
+
+
 ./%.o: .././%.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 4.9.2
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.1.130\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.1.130\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+tests/%.o: ../tests/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 4.9.2
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.1.130\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.1.130\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

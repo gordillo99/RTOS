@@ -10,3 +10,7 @@ os.c
 
 queue.c
 
+tests\TEST_too_many_tasks.c
+
+uart.c
+

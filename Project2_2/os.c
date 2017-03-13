@@ -164,7 +164,7 @@ PID Kernel_Create_Task_At( volatile PD *p, voidfuncptr f, PRIORITY priority, int
 static PID Kernel_Create_Task(voidfuncptr f, PRIORITY priority, int arg, int offset, int wcet, int period) {
 	int x;
 
-	if (Tasks == MAXTHREAD) return;  /* Too many task! */
+	if (Tasks == MAXTHREAD) return NULL;  /* Too many task! */
 
 	/* find a DEAD PD that we can use  */
 	for (x = 0; x < MAXTHREAD; x++) {
