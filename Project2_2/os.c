@@ -45,6 +45,11 @@ extern void Enter_Kernel();
 static PD Process[MAXTHREAD];
 
 /**
+  * The number of ticks since the system began
+  */
+PID time_since_system_start;
+
+/**
   * The process descriptor of the currently RUNNING task.
   */
 volatile static PD* Cp; 
@@ -502,6 +507,14 @@ int Task_GetArg(PID p) {
 	return (Cp->arg);
 }
 
+ // number of milliseconds since the RTOS boots.
+unsigned int Now(){
+	volatile uint16_t t = TCNT1;
+	volatile unsigned int temp = t;
+	volatile float f = ((temp*1.0)/635)*10;
+	return time_since_system_start*10 + (unsigned int)f;
+}
+
 /**
   * Setup pins and timers
   */
@@ -548,7 +561,7 @@ ISR(TIMER1_COMPA_vect) {
 	if (Cp->priority == PERIODIC) {
 		Cp->runningTime++;
 	}
-
+	time_since_system_start++;
 	for (i = PeriodicCount-1; i >= 0; i--) 
 		if (PeriodicQueue[i]->countdown > 0) PeriodicQueue[i]->countdown -= 1;
 	Run_Next();

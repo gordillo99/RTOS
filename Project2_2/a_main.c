@@ -74,8 +74,8 @@ void a_main()
 	Task_Create_Period(ASDF3,2, 10, 9 ,2);
 	Task_Create_RR(ASDF4,5);
 	Task_Create_System(ASDF5,6);
-	//Task_Create_System(ASDF3,3);
-	//Task_Create_RR(ASDF4,4);
+	Task_Create_System(ASDF3,3);
+	Task_Create_RR(ASDF4,4);
 
     // Kill the initialization task
     Task_Terminate();
