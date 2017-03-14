@@ -37,11 +37,12 @@ void enqueue(volatile PD **p, volatile PD **Queue, volatile int *QCount) {
     (*QCount)++;
 }
 
+
+
 /*
  *  Return the first element of the Queue
  */
 volatile PD *dequeue(volatile PD **Queue, volatile int *QCount) {
-
    if(isEmpty(QCount)) {
 	   return NULL;
    }

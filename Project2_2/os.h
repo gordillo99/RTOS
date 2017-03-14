@@ -54,7 +54,9 @@ typedef enum kernel_request_type {
     NEXT,
     TERMINATE,
 	SEND,
+	ASYNC_SEND,
 	RECEIVE,
+	CHECK_TIME_VIOLATION,
 } KERNEL_REQUEST_TYPE;
 
 typedef enum channel_states {
@@ -98,7 +100,7 @@ typedef struct ChannelDescriptor {
 } CD;
 
 // void OS_Init(void);      redefined as main()
-void OS_Abort(void);
+void OS_Abort(unsigned int error);
 
 PID  Task_Create( void (*f)(void), PRIORITY py, int arg,  int offset,  int wcet,  int period);
 void Task_Terminate(void);
