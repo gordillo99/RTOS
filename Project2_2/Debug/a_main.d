@@ -14,9 +14,11 @@ a_main.d a_main.o: .././a_main.c \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay_basic.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\math.h \
- .././os.h ../././tests/TEST_too_many_tasks.h \
- ../././tests/TEST_too_many_tasks.h ../././tests/../uart.h \
- ../././tests/../os.h
+ .././os.h ../././tests/TEST_too_many_tasks.h ../././tests/../uart.h \
+ ../././tests/../os.h ../././tests/TEST_priority.h \
+ ../././tests/TEST_system_task_scheduling.h ../././tests/TEST_priority.h \
+ ../././tests/TEST_rr_task_scheduling.h \
+ ../././tests/TEST_periodic_task_scheduling.h
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h:
 
@@ -52,8 +54,16 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 
 ../././tests/TEST_too_many_tasks.h:
 
-../././tests/TEST_too_many_tasks.h:
-
 ../././tests/../uart.h:
 
 ../././tests/../os.h:
+
+../././tests/TEST_priority.h:
+
+../././tests/TEST_system_task_scheduling.h:
+
+../././tests/TEST_priority.h:
+
+../././tests/TEST_rr_task_scheduling.h:
+
+../././tests/TEST_periodic_task_scheduling.h:

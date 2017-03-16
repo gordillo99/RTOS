@@ -256,16 +256,23 @@ static void Next_Kernel_Request() {
 		case CREATE:
 			Cp->response = Kernel_Create_Task( Cp->code, Cp->priority, Cp->arg, -1, -1, -1);
 			break;
-		case CREATE_SYS:
-			Cp->response = Kernel_Create_Task( Cp->code, SYSTEM, Cp->arg, -1, -1, -1);
-			break;
 		case CREATE_PERIODIC:
 			Cp->response = Kernel_Create_Task( Cp->code, PERIODIC, Cp->arg, Cp->offset, Cp->wcet, Cp->period);
+			if(Cp->priority == RR && Cp->offset == 0){
+				Cp->request = NEXT;
+				goto cnext;
+			}
 			break;
 		case CREATE_RR:
 			Cp->response = Kernel_Create_Task( Cp->code, RR, Cp->arg, -1, -1, -1);
 			break;
-		case NEXT:
+		case CREATE_SYS:
+			Cp->response = Kernel_Create_Task( Cp->code, SYSTEM, Cp->arg, -1, -1, -1);
+			if(Cp->priority == SYSTEM) 
+				break;
+			else
+				Cp->request = NEXT;
+cnext:	case NEXT:
 			Cp->state = READY;
 			if (Cp->priority == SYSTEM) {
 				enqueue(&Cp, &SysQueue, &SysCount);
@@ -398,8 +405,8 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg,  int offset,  int wce
 		}
 
 		Cp->code = f;
-		PRIORITY og_priority = Cp->priority;
-		Cp->priority = priority;
+		//PRIORITY og_priority = Cp->priority;
+		//Cp->priority = priority;
 		int og_arg = Cp->arg;
 		Cp->arg = arg;
 		int og_offset = Cp->offset;
@@ -413,7 +420,7 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg,  int offset,  int wce
 
 		// restore the Cp to original values
 		p = Cp->response;
-		Cp->priority = og_priority; 
+		//Cp->priority = og_priority; 
 		Cp->offset = og_offset;
 		Cp->wcet = og_wcet;
 		Cp->period = og_period;
@@ -503,7 +510,7 @@ void Task_Terminate() {
 /**
   * Application level task getarg to return intiial arg value
   */
-int Task_GetArg(PID p) {
+int Task_GetArg() {
 	return (Cp->arg);
 }
 

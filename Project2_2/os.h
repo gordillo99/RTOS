@@ -102,14 +102,9 @@ typedef struct ChannelDescriptor {
 // void OS_Init(void);      redefined as main()
 void OS_Abort(unsigned int error);
 
-PID  Task_Create( void (*f)(void), PRIORITY py, int arg,  int offset,  int wcet,  int period);
 void Task_Terminate(void);
 void Task_Next(void); // Same as yield
-int  Task_GetArg( PID p );
-void Task_Suspend( PID p );          
-void Task_Resume( PID p );
-
-void Task_Sleep(TICK t);  // sleep time is at least t*MSECPERTICK
+int  Task_GetArg(void);
 
 /*
  * Scheduling Policy:
