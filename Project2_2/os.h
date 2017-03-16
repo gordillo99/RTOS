@@ -30,7 +30,6 @@ typedef unsigned int CHAN;       // always non-zero if it is valid
 typedef unsigned int TICK;       // 1 TICK is defined by MSECPERTICK
 typedef unsigned int BOOL;       // TRUE or FALSE
 
-
 /**
   *  This is the set of states that a task can be in at any given time.
   */

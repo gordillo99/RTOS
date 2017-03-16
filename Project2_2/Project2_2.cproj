@@ -151,10 +151,22 @@
     <Compile Include="queue.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="tests\TEST_periodic_task_overlap.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="tests\TEST_periodic_task_overlap.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="tests\TEST_periodic_task_scheduling.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="tests\TEST_periodic_task_scheduling.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="tests\TEST_periodic_task_timing.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="tests\TEST_periodic_task_timing.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="tests\TEST_priority.c">
@@ -173,6 +185,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="tests\TEST_system_task_scheduling.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="tests\TEST_Task_Next.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="tests\TEST_Task_Next.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="tests\TEST_too_many_tasks.c">
