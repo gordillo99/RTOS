@@ -1,9 +1,3 @@
-/*
- * IncFile1.h
- *
- * Created: 3/11/2017 8:56:21 PM
- *  Author: Cyrus
- */ 
 
 #ifndef INCFILE1_H_
 #define INCFILE1_H_
