@@ -668,7 +668,7 @@ void kernel_receive() {
 }
 
 void Write(CHAN ch, int v) {
-	if (Cp->priority == PERIODIC) OS_Abort(5); // periodic tasks are not allowed to use csp
+	//if (Cp->priority == PERIODIC) OS_Abort(5); // periodic tasks are not allowed to use csp
 	Cp->request = ASYNC_SEND;
 	Cp->senderChannel = ch;
 	Cp->val = v;

@@ -10,6 +10,8 @@ os.c
 
 queue.c
 
+tests\TEST_chan_send_recieve.c
+
 tests\TEST_periodic_task_overlap.c
 
 tests\TEST_periodic_task_scheduling.c

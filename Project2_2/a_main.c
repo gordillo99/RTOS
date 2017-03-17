@@ -9,6 +9,7 @@
 #include "./tests/TEST_Task_Next.h"
 #include "./tests/TEST_periodic_task_overlap.h"
 #include "./tests/TEST_periodic_task_timing.h"
+#include "./tests/TEST_chan_send_recieve.h"
 
 void ASDF1();
 void ASDF2();
@@ -84,6 +85,6 @@ void a_main()
 	Task_Create_System(ASDF3,3);
 	Task_Create_RR(ASDF4,4);
 	*/
-	Task_Create_System(test_periodic_task_timing, 0);
+	Task_Create_System(test_chan_send_recieve, 0);
     // Kill the initialization task
 }

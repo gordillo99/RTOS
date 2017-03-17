@@ -43,6 +43,7 @@ C_SRCS +=  \
 ../a_main.c \
 ../os.c \
 ../queue.c \
+../tests/TEST_chan_send_recieve.c \
 ../tests/TEST_periodic_task_overlap.c \
 ../tests/TEST_periodic_task_scheduling.c \
 ../tests/TEST_periodic_task_timing.c \
@@ -66,6 +67,7 @@ cswitch.o \
 a_main.o \
 os.o \
 queue.o \
+tests/TEST_chan_send_recieve.o \
 tests/TEST_periodic_task_overlap.o \
 tests/TEST_periodic_task_scheduling.o \
 tests/TEST_periodic_task_timing.o \
@@ -81,6 +83,7 @@ cswitch.o \
 a_main.o \
 os.o \
 queue.o \
+tests/TEST_chan_send_recieve.o \
 tests/TEST_periodic_task_overlap.o \
 tests/TEST_periodic_task_scheduling.o \
 tests/TEST_periodic_task_timing.o \
@@ -96,6 +99,7 @@ cswitch.d \
 a_main.d \
 os.d \
 queue.d \
+tests/TEST_chan_send_recieve.d \
 tests/TEST_periodic_task_overlap.d \
 tests/TEST_periodic_task_scheduling.d \
 tests/TEST_periodic_task_timing.d \
@@ -111,6 +115,7 @@ cswitch.d \
 a_main.d \
 os.d \
 queue.d \
+tests/TEST_chan_send_recieve.d \
 tests/TEST_periodic_task_overlap.d \
 tests/TEST_periodic_task_scheduling.d \
 tests/TEST_periodic_task_timing.d \
@@ -135,6 +140,8 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 

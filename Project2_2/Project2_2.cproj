@@ -151,6 +151,12 @@
     <Compile Include="queue.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="tests\TEST_chan_send_recieve.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="tests\TEST_chan_send_recieve.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="tests\TEST_periodic_task_overlap.c">
       <SubType>compile</SubType>
     </Compile>
