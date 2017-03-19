@@ -85,6 +85,6 @@ void a_main()
 	Task_Create_System(ASDF3,3);
 	Task_Create_RR(ASDF4,4);
 	*/
-	Task_Create_System(test_chan_send_recieve, 4);
+	Task_Create_System(test_too_many_tasks, 0);
     // Kill the initialization task
 }

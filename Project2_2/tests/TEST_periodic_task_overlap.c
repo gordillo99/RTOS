@@ -41,9 +41,6 @@ void test_periodic_task_overlap(void){
 		case 4:
 			Task_Create_Period(Periodic_Task_wcet_2, 0, 3, 4, 0);
 			break;
-		case 5: //SHOULD NOT ABORT!
-			Task_Create_Period(Periodic_Task_wcet_2, 0, 3, 2, 0);
-			Task_Create_Period(Periodic_Task_wcet_1, 0, 3, 1, 2);
 		default:
 			Task_Terminate();
 	}

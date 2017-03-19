@@ -75,7 +75,7 @@ static void error_check(){
 				uart_write("test_chan_send_recieve FAILED");
 			break;
 		case 2:
-			if(strcmp(trace, "5665") == 0)
+			if(strcmp(trace, "5656") == 0)
 				uart_write("test_chan_send_recieve PASSED");
 			else
 				uart_write("test_chan_send_recieve FAILED");
@@ -112,7 +112,7 @@ void test_chan_send_recieve(void){
 		case 2:	//One system task receives on a channel then waits. A RR sends on the channel and both continue;
 			Task_Create_System(System_Task_2, 5);
 			Task_Create_RR(RR_Task_1, 6);
-			Task_Create_RR(error_check, 0);
+			Task_Create_Period(error_check, 0, 2, 1, 1);
 			break;
 		case 3:	//Multiple system tasks receive on a channel then wait. A system task sends on a channel and all continue;
 			Task_Create_System(System_Task_2, 6);

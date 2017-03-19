@@ -13,6 +13,17 @@ void Test_Task2(){
 	add_to_trace(trace, temp);
 }
 
+void Test_Task3(){
+	int x;
+	itoa(Task_GetArg(), temp, 10);
+	add_to_trace(trace, temp);
+	for(x = 0; x < 32000; x++){}
+	for(x = 0; x < 32000; x++){}
+	for(x = 0; x < 32000; x++){}
+	for(x = 0; x < 32000; x++){}
+	add_to_trace(trace, temp);
+}
+
 static void error_check(){
 	if(strcmp(trace, "0011223344") == 0)
 		uart_write("test_system_task_scheduling PASSED");
@@ -23,7 +34,7 @@ static void error_check(){
 void test_system_task_scheduling(void){
 	uart_start();
 	Task_Create_System(Test_Task2, 0);
-	Task_Create_System(Test_Task2, 1);
+	Task_Create_System(Test_Task3, 1);
 	Task_Create_System(Test_Task2, 2);
 	Task_Create_System(Test_Task2, 3);
 	Task_Create_System(Test_Task2, 4);
