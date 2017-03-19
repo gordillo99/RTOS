@@ -7,6 +7,7 @@
 #define MSECPERTICK   10   // resolution of a system TICK in milliseconds
 #define MINPRIORITY   10   /** 0 is the highest priority, 10 the lowest */
 
+// definition of priorities and idle task
 #define SYSTEM 3
 #define PERIODIC 2
 #define RR 1
@@ -58,6 +59,9 @@ typedef enum kernel_request_type {
 	CHECK_TIME_VIOLATION,
 } KERNEL_REQUEST_TYPE;
 
+/**
+ *	possible states of a channel
+ */
 typedef enum channel_states {
 	UNITIALIZED,
 	BLOCKING,
@@ -70,32 +74,36 @@ typedef enum channel_states {
   * the task's stack, i.e., its workspace, in here.
   */
 typedef struct ProcessDescriptor {
-    PID processID;
+    PID processID; // id of the process
     unsigned char *sp;   /* stack pointer into the "workSpace" */
-    unsigned char workSpace[WORKSPACE]; 
-    PROCESS_STATES state;
-    PRIORITY priority;
-    int arg;
+    unsigned char workSpace[WORKSPACE];
+    PROCESS_STATES state; // state of the process
+    PRIORITY priority; // priority of the process (RR, SYS, PER, or idle task)
+    int arg; // arg passed to process
     voidfuncptr  code;   /* function to be executed as a task */
-    KERNEL_REQUEST_TYPE request;
-    unsigned int response;
-    TICK wakeTickOverflow;
-	TICK period, wcet, offset;
-	int countdown;
-	unsigned int runningTime;
-	int retval;
-	CHAN senderChannel;
-	CHAN receiverChannel;
-	int val;
+    KERNEL_REQUEST_TYPE request; // request to kernel
+    unsigned int response; // response when creating tasks
+    TICK wakeTickOverflow; 
+	TICK period, wcet, offset; // parameters for periodic tasks
+	int countdown; // countdown to execute again (for periodic tasks)
+	unsigned int runningTime; // time the task has run (for periodic tasks)
+	int retval; 
+	CHAN senderChannel; // channel used for sending int
+	CHAN receiverChannel; // channel used for receiving int
+	int val; // val passed to/from CSP
 } PD;
 
+/**
+ * Each channel is represented using a Channel descriptor.
+ * It holds all important information about the channel
+ */
 typedef struct ChannelDescriptor {
-	CHAN channelID;
-	PD * sender;
-	PD * receivers[MAXTHREAD];
-	unsigned int numberReceivers;
-	CHANNEL_STATES state;
-	unsigned int val;
+	CHAN channelID; // id of the channel
+	PD * sender; // pointer to sender (process)
+	PD * receivers[MAXTHREAD]; // array of receivers (processes)
+	unsigned int numberReceivers; // total number of receivers in channel
+	CHANNEL_STATES state; // state of channel
+	unsigned int val; // val to pass from sender to receivers
 } CD;
 
 // void OS_Init(void);      redefined as main()
