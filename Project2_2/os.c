@@ -671,6 +671,7 @@ void Send(CHAN ch, int v) {
  * or it unblocks receivers if they are waiting
  */
 void kernel_send() {
+	BOOL sys_task_ready = FALSE;
 	if (ChannelArray[Cp->senderChannel - 1].numberReceivers == 0) { // no receivers waiting
 		if (ChannelArray[Cp->senderChannel - 1].sender == NULL) ChannelArray[Cp->senderChannel - 1].sender = Cp;
 		else OS_Abort(6); // cant have more than 1 sender
@@ -688,14 +689,19 @@ void kernel_send() {
 			ChannelArray[Cp->senderChannel - 1].receivers[l]->val = Cp->val;
 
 			if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == SYSTEM) {
+				sys_task_ready = TRUE;
 				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &SysQueue, &SysCount);
-				} else if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == RR) {
+			} else if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == RR) {
 				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &RRQueue, &RRCount);
 			}
 			ChannelArray[Cp->senderChannel - 1].receivers[l] = NULL;
 			ChannelArray[Cp->senderChannel - 1].numberReceivers--;
 		}
 		ChannelArray[Cp->senderChannel - 1].val = NULL;
+		if (sys_task_ready && Cp->priority == RR) {
+			enqueue(&Cp, &RRQueue, &RRCount);
+			Dispatch();
+		}
 	}
 }
 
@@ -717,12 +723,14 @@ int Recv(CHAN ch) {
  * if no sender is waiting. also, it unblocks sender if it is waiting
  */
 void kernel_receive() {
+	BOOL sys_task_ready = FALSE;
+
 	if (ChannelArray[Cp->receiverChannel - 1].sender == NULL) { // no sender waiting
 		Cp->state = BLOCKED; // block calling process
 		// add current process to receivers array
 		enqueue(&Cp, &ChannelArray[Cp->receiverChannel - 1].receivers, &ChannelArray[Cp->receiverChannel - 1].numberReceivers);
 		Dispatch(); // get next process to run
-		} else { // sender is waiting
+	} else { // sender is waiting
 		// set sender to ready
 		ChannelArray[Cp->receiverChannel - 1].sender->state = READY;
 		// grab value to be passed from channel
@@ -730,13 +738,18 @@ void kernel_receive() {
 
 		// enqueue sender so it runs again
 		if (ChannelArray[Cp->receiverChannel - 1].sender->priority == SYSTEM) {
+			sys_task_ready = TRUE;
 			enqueue(&ChannelArray[Cp->receiverChannel - 1].sender, &SysQueue, &SysCount);
-			} else if (ChannelArray[Cp->receiverChannel - 1].sender->priority == RR) {
+		} else if (ChannelArray[Cp->receiverChannel - 1].sender->priority == RR) {
 			enqueue(&ChannelArray[Cp->receiverChannel - 1].sender, &RRQueue, &RRCount);
 		}
 		// clear sender and val info
 		ChannelArray[Cp->receiverChannel - 1].sender = NULL;
 		ChannelArray[Cp->senderChannel - 1].val = NULL;
+		if (sys_task_ready && Cp->priority == RR) {
+			enqueue(&Cp, &RRQueue, &RRCount);
+			Dispatch();
+		}
 	}
 }
 
@@ -757,6 +770,8 @@ void Write(CHAN ch, int v) {
  *	pretty much the same as kernel_send() except process is not blocked if no receivers are waiting
  */
 void kernel_async_send() {
+	BOOL sys_task_ready = FALSE;
+
 	if (ChannelArray[Cp->senderChannel - 1].numberReceivers == 0) { // no receivers waiting
 		if (ChannelArray[Cp->senderChannel - 1].sender == NULL) ChannelArray[Cp->senderChannel - 1].sender = Cp;
 		else OS_Abort(6); // cant have more than 1 sender
@@ -771,14 +786,19 @@ void kernel_async_send() {
 			ChannelArray[Cp->senderChannel - 1].receivers[l]->val = Cp->val;
 
 			if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == SYSTEM) {
+				sys_task_ready = TRUE;
 				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &SysQueue, &SysCount);
-				} else if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == RR) {
+			} else if (ChannelArray[Cp->senderChannel - 1].receivers[l]->priority == RR) {
 				enqueue(&ChannelArray[Cp->senderChannel - 1].receivers[l], &RRQueue, &RRCount);
 			}
 			ChannelArray[Cp->senderChannel - 1].receivers[l] = NULL;
 			ChannelArray[Cp->senderChannel - 1].numberReceivers--;
 		}
 		ChannelArray[Cp->senderChannel - 1].val = NULL;
+		if (sys_task_ready && Cp->priority == RR) {
+			enqueue(&Cp, &RRQueue, &RRCount);
+			Dispatch();
+		}
 	}
 }
 
