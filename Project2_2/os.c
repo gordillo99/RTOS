@@ -757,7 +757,6 @@ void kernel_receive() {
  *	pretty much the same as Send() except process is not blocked if no receivers are waiting
  */
 void Write(CHAN ch, int v) {
-	if (Cp->priority == PERIODIC) OS_Abort(5); // periodic tasks are not allowed to use csp
 	if (ChannelArray[ch - 1].state == UNITIALIZED) OS_Abort(6); // trying to use unitialized channel
 
 	Cp->request = ASYNC_SEND;
