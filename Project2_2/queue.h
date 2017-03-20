@@ -8,10 +8,4 @@ volatile int isEmpty(volatile int *QCount);
 void enqueue(volatile PD **p, volatile PD **Queue, volatile int *QCount);
 volatile PD *dequeue(volatile PD **Queue, volatile int *QCount);
 
-extern volatile PD *SleepQueue[MAXTHREAD];
-extern volatile int SQCount;
-
-extern volatile PD *WaitingQueue[MAXTHREAD];
-extern volatile int WQCount;
-
 #endif /* _QUEUE_H_ */

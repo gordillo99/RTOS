@@ -2,6 +2,14 @@
 #include <util/delay.h>
 #include "os.h"
 #include "./tests/TEST_too_many_tasks.h"
+#include "./tests/TEST_priority.h"
+#include "./tests/TEST_system_task_scheduling.h"
+#include "./tests/TEST_rr_task_scheduling.h"
+#include "./tests/TEST_periodic_task_scheduling.h"
+#include "./tests/TEST_Task_Next.h"
+#include "./tests/TEST_periodic_task_overlap.h"
+#include "./tests/TEST_periodic_task_timing.h"
+#include "./tests/TEST_chan_send_recieve.h"
 
 void ASDF1();
 void ASDF2();
@@ -67,7 +75,7 @@ void ASDF5()
 
 void a_main()
 {
-	
+	/*
     // Initialize tasks
 	Task_Create_Period(ASDF1,1, 10, 9, 0);
 	Task_Create_Period(ASDF2,2, 10, 9 ,1);
@@ -76,7 +84,7 @@ void a_main()
 	Task_Create_System(ASDF5,6);
 	Task_Create_System(ASDF3,3);
 	Task_Create_RR(ASDF4,4);
-
+	*/
+	Task_Create_System(test_chan_send_recieve, 4);
     // Kill the initialization task
-    Task_Terminate();
 }

@@ -33,6 +33,8 @@ LINKER_SCRIPT_DEP:=
 
 # Every subdirectory with source files must be described here
 SUBDIRS :=  \
+../Debug/ \
+../Debug/tests/ \
 ../tests/
 
 
@@ -41,6 +43,14 @@ C_SRCS +=  \
 ../a_main.c \
 ../os.c \
 ../queue.c \
+../tests/TEST_chan_send_recieve.c \
+../tests/TEST_periodic_task_overlap.c \
+../tests/TEST_periodic_task_scheduling.c \
+../tests/TEST_periodic_task_timing.c \
+../tests/TEST_priority.c \
+../tests/TEST_rr_task_scheduling.c \
+../tests/TEST_system_task_scheduling.c \
+../tests/TEST_Task_Next.c \
 ../tests/TEST_too_many_tasks.c \
 ../uart.c
 
@@ -57,6 +67,14 @@ cswitch.o \
 a_main.o \
 os.o \
 queue.o \
+tests/TEST_chan_send_recieve.o \
+tests/TEST_periodic_task_overlap.o \
+tests/TEST_periodic_task_scheduling.o \
+tests/TEST_periodic_task_timing.o \
+tests/TEST_priority.o \
+tests/TEST_rr_task_scheduling.o \
+tests/TEST_system_task_scheduling.o \
+tests/TEST_Task_Next.o \
 tests/TEST_too_many_tasks.o \
 uart.o
 
@@ -65,6 +83,14 @@ cswitch.o \
 a_main.o \
 os.o \
 queue.o \
+tests/TEST_chan_send_recieve.o \
+tests/TEST_periodic_task_overlap.o \
+tests/TEST_periodic_task_scheduling.o \
+tests/TEST_periodic_task_timing.o \
+tests/TEST_priority.o \
+tests/TEST_rr_task_scheduling.o \
+tests/TEST_system_task_scheduling.o \
+tests/TEST_Task_Next.o \
 tests/TEST_too_many_tasks.o \
 uart.o
 
@@ -73,6 +99,14 @@ cswitch.d \
 a_main.d \
 os.d \
 queue.d \
+tests/TEST_chan_send_recieve.d \
+tests/TEST_periodic_task_overlap.d \
+tests/TEST_periodic_task_scheduling.d \
+tests/TEST_periodic_task_timing.d \
+tests/TEST_priority.d \
+tests/TEST_rr_task_scheduling.d \
+tests/TEST_system_task_scheduling.d \
+tests/TEST_Task_Next.d \
 tests/TEST_too_many_tasks.d \
 uart.d
 
@@ -81,6 +115,14 @@ cswitch.d \
 a_main.d \
 os.d \
 queue.d \
+tests/TEST_chan_send_recieve.d \
+tests/TEST_periodic_task_overlap.d \
+tests/TEST_periodic_task_scheduling.d \
+tests/TEST_periodic_task_timing.d \
+tests/TEST_priority.d \
+tests/TEST_rr_task_scheduling.d \
+tests/TEST_system_task_scheduling.d \
+tests/TEST_Task_Next.d \
 tests/TEST_too_many_tasks.d \
 uart.d
 
@@ -98,6 +140,22 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

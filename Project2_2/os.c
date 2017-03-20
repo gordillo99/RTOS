@@ -273,16 +273,23 @@ static void Next_Kernel_Request() {
 		case CREATE: // should not be needed
 			Cp->response = Kernel_Create_Task( Cp->code, Cp->priority, Cp->arg, -1, -1, -1);
 			break;
-		case CREATE_SYS: // creates new system task
-			Cp->response = Kernel_Create_Task( Cp->code, SYSTEM, Cp->arg, -1, -1, -1);
-			break;
 		case CREATE_PERIODIC: // creates new periodic task
 			Cp->response = Kernel_Create_Task( Cp->code, PERIODIC, Cp->arg, Cp->offset, Cp->wcet, Cp->period);
+			if(Cp->priority == RR && Cp->offset == 0){
+				Cp->request = NEXT;
+				goto cnext;
+			}
 			break;
 		case CREATE_RR: // creates new rr task
 			Cp->response = Kernel_Create_Task( Cp->code, RR, Cp->arg, -1, -1, -1);
 			break;
-		case NEXT:
+		case CREATE_SYS: // creates new system task
+			Cp->response = Kernel_Create_Task( Cp->code, SYSTEM, Cp->arg, -1, -1, -1);
+			if(Cp->priority == SYSTEM) 
+				break;
+			else
+				Cp->request = NEXT;
+cnext:	case NEXT:
 			Cp->state = READY; // set process to be enqueued as ready to run
 			// enqueue in appropriate queue
 			if (Cp->priority == SYSTEM) {
@@ -423,8 +430,8 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg,  int offset,  int wce
 
 		// set info to pass to kernel
 		Cp->code = f;
-		PRIORITY og_priority = Cp->priority;
-		Cp->priority = priority;
+		//PRIORITY og_priority = Cp->priority;
+		//Cp->priority = priority;
 		int og_arg = Cp->arg;
 		Cp->arg = arg;
 		int og_offset = Cp->offset;
@@ -438,7 +445,7 @@ PID Task_Create(voidfuncptr f, PRIORITY priority, int arg,  int offset,  int wce
 
 		// restore the Cp to original values
 		p = Cp->response;
-		Cp->priority = og_priority; 
+		//Cp->priority = og_priority; 
 		Cp->offset = og_offset;
 		Cp->wcet = og_wcet;
 		Cp->period = og_period;
@@ -540,7 +547,7 @@ void Task_Terminate() {
 /**
   * Application level task getarg to return intiial arg value
   */
-int Task_GetArg(PID p) {
+int Task_GetArg() {
 	return (Cp->arg);
 }
 
@@ -750,8 +757,8 @@ void kernel_receive() {
  *	pretty much the same as Send() except process is not blocked if no receivers are waiting
  */
 void Write(CHAN ch, int v) {
-	if (Cp->priority == PERIODIC) OS_Abort(5); // periodic tasks are not allowed to use csp
 	if (ChannelArray[ch - 1].state == UNITIALIZED) OS_Abort(6); // trying to use unitialized channel
+
 	Cp->request = ASYNC_SEND;
 	Cp->senderChannel = ch;
 	Cp->val = v;

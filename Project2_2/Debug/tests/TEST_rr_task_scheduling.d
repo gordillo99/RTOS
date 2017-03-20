@@ -1,4 +1,6 @@
-uart.d uart.o: .././uart.c .././uart.h \
+tests/TEST_rr_task_scheduling.d tests/TEST_rr_task_scheduling.o: \
+ ../tests/TEST_rr_task_scheduling.c ../tests/TEST_rr_task_scheduling.h \
+ ../tests/../uart.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\sfr_defs.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\inttypes.h \
@@ -11,9 +13,11 @@ uart.d uart.o: .././uart.c .././uart.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\version.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\fuse.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\lock.h \
- .././os.h
+ ../tests/../os.h ../tests/TEST_priority.h
 
-.././uart.h:
+../tests/TEST_rr_task_scheduling.h:
+
+../tests/../uart.h:
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h:
 
@@ -39,4 +43,6 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\lock.h:
 
-.././os.h:
+../tests/../os.h:
+
+../tests/TEST_priority.h:

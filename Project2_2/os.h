@@ -31,7 +31,6 @@ typedef unsigned int CHAN;       // always non-zero if it is valid
 typedef unsigned int TICK;       // 1 TICK is defined by MSECPERTICK
 typedef unsigned int BOOL;       // TRUE or FALSE
 
-
 /**
   *  This is the set of states that a task can be in at any given time.
   */
@@ -110,9 +109,9 @@ typedef struct ChannelDescriptor {
 // void OS_Init(void);      redefined as main()
 void OS_Abort(unsigned int error);
 
-PID  Task_Create( void (*f)(void), PRIORITY py, int arg,  int offset,  int wcet,  int period);
 void Task_Terminate(void);
 void Task_Next(void); // Same as yield
+int  Task_GetArg(void);
 
 /*
  * Scheduling Policy:
